@@ -1,0 +1,57 @@
+<div class="page-header">
+  <div>
+    <h1>Salles</h1>
+    <p class="muted">Gestion du réseau multisite</p>
+  </div>
+  <button mat-flat-button color="primary" (click)="nouveau()">
+    <mat-icon>add_business</mat-icon> Nouvelle salle
+  </button>
+</div>
+
+<div class="grid">
+  <mat-card *ngFor="let s of sites" class="site-card">
+    <div class="head">
+      <mat-icon>store</mat-icon>
+      <div class="grow">
+        <div class="nom">{{ s.nom }}</div>
+        <div class="addr">{{ s.adresse || '—' }}</div>
+      </div>
+      <span class="dot" [class.on]="s.actif"></span>
+    </div>
+    <div class="meta">
+      <div><mat-icon>phone</mat-icon> {{ s.telephone || '—' }}</div>
+      <div><mat-icon>mail</mat-icon> {{ s.email || '—' }}</div>
+    </div>
+    <div class="actions">
+      <button mat-button color="primary" (click)="modifier(s)"><mat-icon>edit</mat-icon> Modifier</button>
+      <button mat-button color="warn" (click)="supprimer(s)"><mat-icon>delete</mat-icon></button>
+    </div>
+  </mat-card>
+</div>
+
+<mat-card class="form-card" *ngIf="edit">
+  <h3>{{ edit.id ? 'Modifier la salle' : 'Nouvelle salle' }}</h3>
+  <form [formGroup]="form" (ngSubmit)="enregistrer()" class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="nom">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Téléphone</mat-label>
+      <input matInput formControlName="telephone">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="span2">
+      <mat-label>Adresse</mat-label>
+      <input matInput formControlName="adresse">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="span2">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email">
+    </mat-form-field>
+    <mat-checkbox formControlName="actif">Salle active</mat-checkbox>
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="annuler()">Annuler</button>
+      <button mat-flat-button color="primary" type="submit">Enregistrer</button>
+    </div>
+  </form>
+</mat-card>

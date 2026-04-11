@@ -1,0 +1,57 @@
+.layout {
+  height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: #1F3864;
+  color: #fff;
+  border: none;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 18px;
+
+    mat-icon {
+      font-size: 34px;
+      width: 34px;
+      height: 34px;
+      color: #FFC107;
+    }
+    .brand-title { font-weight: 700; font-size: 18px; letter-spacing: 1px; }
+    .brand-sub   { font-size: 12px; opacity: 0.75; }
+  }
+
+  mat-divider { background: rgba(255,255,255,0.15); }
+
+  mat-nav-list a {
+    color: #fff;
+    border-left: 3px solid transparent;
+
+    mat-icon { color: rgba(255,255,255,0.75); }
+
+    &:hover { background: rgba(255,255,255,0.06); }
+    &.active {
+      background: rgba(255,193,7,0.12);
+      border-left-color: #FFC107;
+      mat-icon { color: #FFC107; }
+    }
+  }
+}
+
+.topbar {
+  background: #ffffff;
+  color: #1F3864;
+  border-bottom: 1px solid #e9ecef;
+
+  .title { font-weight: 600; }
+  .spacer { flex: 1; }
+}
+
+.content {
+  padding: 24px;
+  background: #f5f6fa;
+  min-height: calc(100vh - 64px);
+}

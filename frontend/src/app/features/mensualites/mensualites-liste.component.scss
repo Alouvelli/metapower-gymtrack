@@ -1,0 +1,24 @@
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+  h1 { margin: 0 0 4px; color: #1F3864; }
+  .muted { margin: 0; color: #888; font-size: 13px; }
+}
+.form-card { padding: 24px; margin-bottom: 16px; h3 { margin: 0 0 16px; color: #1F3864; } }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+  .actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; }
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+.table-card { padding: 16px; }
+.full { width: 100%; }
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fcf3cf; color: #b57f00;
+  &.ok { background: #d4f5e0; color: #1d8348; }
+}

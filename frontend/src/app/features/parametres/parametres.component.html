@@ -1,0 +1,63 @@
+<div class="page-header">
+  <div>
+    <h1>Paramètres</h1>
+    <p class="muted">Plans d'abonnement et configuration</p>
+  </div>
+</div>
+
+<mat-tab-group>
+  <mat-tab label="Plans d'abonnement">
+    <div class="tab-body">
+      <div class="bar">
+        <button mat-flat-button color="primary" (click)="nouveau()">
+          <mat-icon>add</mat-icon> Nouveau plan
+        </button>
+      </div>
+
+      <div class="grid">
+        <mat-card *ngFor="let p of plans" class="plan-card" [class.disabled]="p.actif === false">
+          <mat-icon>card_membership</mat-icon>
+          <h3>{{ p.nom }}</h3>
+          <div class="prix">{{ p.prix }} FCFA</div>
+          <div class="duree">{{ p.dureeEnMois }} mois</div>
+          <div class="actions">
+            <button mat-button color="primary" (click)="modifier(p)"><mat-icon>edit</mat-icon></button>
+            <button mat-button color="warn" (click)="supprimer(p)"><mat-icon>delete</mat-icon></button>
+          </div>
+        </mat-card>
+      </div>
+
+      <mat-card class="form-card" *ngIf="edit">
+        <h3>{{ edit.id ? 'Modifier le plan' : 'Nouveau plan' }}</h3>
+        <form [formGroup]="form" (ngSubmit)="enregistrer()" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Nom du plan</mat-label>
+            <input matInput formControlName="nom">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Durée (mois)</mat-label>
+            <input matInput type="number" formControlName="dureeEnMois">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Prix (FCFA)</mat-label>
+            <input matInput type="number" formControlName="prix">
+          </mat-form-field>
+          <mat-checkbox formControlName="actif">Plan actif</mat-checkbox>
+          <div class="actions-row">
+            <button mat-stroked-button type="button" (click)="edit = null">Annuler</button>
+            <button mat-flat-button color="primary" type="submit">Enregistrer</button>
+          </div>
+        </form>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Sécurité">
+    <div class="tab-body">
+      <mat-card class="info-card">
+        <mat-icon>info</mat-icon>
+        <p>La gestion des utilisateurs et des affectations staff/salle se fait directement depuis la base de données pour la version Standard. Une interface dédiée pourra être ajoutée en évolution.</p>
+      </mat-card>
+    </div>
+  </mat-tab>
+</mat-tab-group>

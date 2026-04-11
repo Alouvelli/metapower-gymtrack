@@ -1,0 +1,68 @@
+<div class="scanner-page">
+
+  <div class="topbar">
+    <div class="brand">
+      <mat-icon>fitness_center</mat-icon>
+      METAPOWER GYM
+    </div>
+    <div class="site-info" *ngIf="!configMode">
+      {{ sites.length ? (sites | slice:0:1)[0].nom : '' }}
+      <button mat-icon-button (click)="configMode = true"><mat-icon>settings</mat-icon></button>
+    </div>
+  </div>
+
+  <!-- Configuration initiale -->
+  <div class="config" *ngIf="configMode">
+    <mat-card>
+      <h2>Configuration de la tablette</h2>
+      <p>Choisir la salle et entrer la clé d'accès device.</p>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Salle</mat-label>
+        <mat-select [(ngModel)]="siteId">
+          <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Clé d'accès device</mat-label>
+        <input matInput type="password" [(ngModel)]="deviceKey">
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" class="full" (click)="sauverConfig()"
+              [disabled]="!siteId || !deviceKey">
+        Démarrer le scanner
+      </button>
+    </mat-card>
+  </div>
+
+  <!-- Scanner actif -->
+  <div class="scan-zone" *ngIf="!configMode">
+    <zxing-scanner
+      [formats]="formats"
+      (scanSuccess)="onScan($event)">
+    </zxing-scanner>
+
+    <div class="overlay">
+      <div class="reticle"></div>
+      <p>Présentez votre carte ou votre ticket QR</p>
+    </div>
+
+    <!-- Résultat -->
+    <div class="result" *ngIf="result" [class.ok]="result.autorise" [class.ko]="!result.autorise">
+      <mat-icon>{{ result.autorise ? 'check_circle' : 'cancel' }}</mat-icon>
+      <h2>{{ result.autorise ? 'Accès autorisé' : 'Accès refusé' }}</h2>
+
+      <div class="info" *ngIf="result.autorise && result.type === 'MEMBRE'">
+        <strong>{{ result.membre?.nom }} {{ result.membre?.prenom }}</strong>
+        <span>{{ result.membre?.numeroCarte }}</span>
+      </div>
+      <div class="info" *ngIf="result.autorise && result.type === 'TICKET'">
+        <strong>Ticket {{ result.ticket?.numero }}</strong>
+        <span>{{ result.ticket?.tarif?.libelle }}</span>
+      </div>
+      <div class="motif" *ngIf="!result.autorise">{{ result.motif }}</div>
+    </div>
+  </div>
+
+</div>

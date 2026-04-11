@@ -1,0 +1,24 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  h1 { margin: 0 0 4px; color: #1F3864; }
+  .muted { margin: 0; color: #888; font-size: 13px; }
+}
+.table-card { padding: 16px; }
+.toolbar { margin-bottom: 8px; }
+.search { width: 360px; max-width: 100%; }
+.full { width: 100%; }
+.ta-right { text-align: right; }
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  &.ok { background: #d4f5e0; color: #1d8348; }
+  &.warn { background: #fcf3cf; color: #b57f00; }
+  &.expire { background: #fadbd8; color: #b03a2e; }
+}
+.loading { display: flex; justify-content: center; padding: 24px; }

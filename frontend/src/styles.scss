@@ -1,18 +1,47 @@
 /* METAPOWER GymTrack — styles globaux */
+@use '@angular/material' as mat;
+@include mat.core();
+
+$mp-primary: mat.define-palette(mat.$indigo-palette, 800);
+$mp-accent:  mat.define-palette(mat.$amber-palette, 600);
+$mp-warn:    mat.define-palette(mat.$red-palette);
+
+$mp-theme: mat.define-light-theme((
+  color: ( primary: $mp-primary, accent: $mp-accent, warn: $mp-warn ),
+  typography: mat.define-typography-config(),
+  density: 0
+));
+
+@include mat.all-component-themes($mp-theme);
+
 html, body { height: 100%; }
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
   background: #f5f6fa;
+  color: #333;
 }
 
 .full-width { width: 100%; }
 .spacer { flex: 1 1 auto; }
 
-/* Couleurs marque METAPOWER */
 :root {
   --mp-primary: #1F3864;
-  --mp-accent: #E74C3C;
+  --mp-accent: #FFC107;
   --mp-success: #27AE60;
   --mp-warning: #F39C12;
+  --mp-danger: #E74C3C;
+}
+
+/* Material overrides marque METAPOWER */
+.mat-mdc-card { border-radius: 10px !important; }
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background-color: var(--mp-primary) !important;
+}
+.mat-toolbar.mat-primary { background-color: var(--mp-primary); }
+
+@media print {
+  app-layout mat-sidenav, .topbar, .page-header button { display: none !important; }
+  .content { padding: 0 !important; }
 }

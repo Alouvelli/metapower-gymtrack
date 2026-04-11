@@ -1,0 +1,50 @@
+<div class="page-header">
+  <div>
+    <h1>Pointages — Temps réel</h1>
+    <p class="muted">Flux live des passages au tourniquet (rafraîchissement 10s)</p>
+  </div>
+  <mat-form-field appearance="outline" class="site-filter">
+    <mat-label>Salle</mat-label>
+    <mat-select [(ngModel)]="siteId" (selectionChange)="changerSite()">
+      <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<mat-card class="table-card">
+  <table mat-table [dataSource]="pointages" class="full">
+    <ng-container matColumnDef="heure">
+      <th mat-header-cell *matHeaderCellDef>Heure</th>
+      <td mat-cell *matCellDef="let p">{{ p.heureEntree | date:'HH:mm:ss' }}</td>
+    </ng-container>
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let p">
+        <mat-icon class="ico" [class.member]="p.typeAcces === 'MEMBRE'" [class.ticket]="p.typeAcces === 'TICKET'">
+          {{ p.typeAcces === 'MEMBRE' ? 'badge' : 'confirmation_number' }}
+        </mat-icon>
+        {{ p.typeAcces }}
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="identite">
+      <th mat-header-cell *matHeaderCellDef>Identité</th>
+      <td mat-cell *matCellDef="let p">
+        <ng-container *ngIf="p.membre">{{ p.membre.nom }} {{ p.membre.prenom }} ({{ p.membre.numeroCarte }})</ng-container>
+        <ng-container *ngIf="p.ticket">Ticket {{ p.ticket.numero }}</ng-container>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="statut">
+      <th mat-header-cell *matHeaderCellDef>Statut</th>
+      <td mat-cell *matCellDef="let p">
+        <span class="badge" [class.ok]="p.statut === 'AUTORISE'">{{ p.statut }}</span>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="motif">
+      <th mat-header-cell *matHeaderCellDef>Motif</th>
+      <td mat-cell *matCellDef="let p">{{ p.motifRefus || '—' }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayed"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayed;"></tr>
+  </table>
+  <p class="empty" *ngIf="!pointages.length">Aucun pointage aujourd'hui sur cette salle.</p>
+</mat-card>

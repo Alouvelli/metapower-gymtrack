@@ -1,0 +1,49 @@
+<div class="page-header">
+  <div>
+    <h1>Rapports</h1>
+    <p class="muted">Exports PDF / Excel — données consolidées ou par salle</p>
+  </div>
+</div>
+
+<mat-card class="filtres">
+  <mat-form-field appearance="outline">
+    <mat-label>Mois</mat-label>
+    <input matInput type="month" [(ngModel)]="mois">
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Salle (optionnel)</mat-label>
+    <mat-select [(ngModel)]="siteId">
+      <mat-option [value]="null">Toutes les salles</mat-option>
+      <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</mat-card>
+
+<div class="grid">
+  <mat-card class="rapport-card">
+    <mat-icon class="big">payments</mat-icon>
+    <h3>Mensualités du mois</h3>
+    <p>Liste détaillée des paiements de mensualités encaissés sur la période.</p>
+    <div class="actions">
+      <button mat-flat-button color="primary" (click)="exportMensXls()" [disabled]="loading">
+        <mat-icon>table_chart</mat-icon> Excel
+      </button>
+      <button mat-stroked-button (click)="exportMensPdf()" [disabled]="loading">
+        <mat-icon>picture_as_pdf</mat-icon> PDF
+      </button>
+    </div>
+  </mat-card>
+
+  <mat-card class="rapport-card">
+    <mat-icon class="big">confirmation_number</mat-icon>
+    <h3>Tickets vendus</h3>
+    <p>Historique complet des tickets vendus à la caisse, filtrable par salle.</p>
+    <div class="actions">
+      <button mat-flat-button color="primary" (click)="exportTicketsXls()" [disabled]="loading">
+        <mat-icon>table_chart</mat-icon> Excel
+      </button>
+    </div>
+  </mat-card>
+</div>
+
+<mat-progress-bar mode="indeterminate" *ngIf="loading"></mat-progress-bar>

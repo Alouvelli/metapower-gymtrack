@@ -1,0 +1,31 @@
+<div class="login-page">
+  <mat-card class="card">
+    <div class="brand">
+      <mat-icon>fitness_center</mat-icon>
+      <h1>METAPOWER GYM</h1>
+      <p>GymTrack — espace de gestion</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Identifiant</mat-label>
+        <input matInput formControlName="username" autocomplete="username">
+        <mat-icon matSuffix>person</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="current-password">
+        <mat-icon matSuffix>lock</mat-icon>
+      </mat-form-field>
+
+      <p class="erreur" *ngIf="erreur">{{ erreur }}</p>
+
+      <button mat-flat-button color="primary" class="full" type="submit"
+              [disabled]="loading || form.invalid">
+        <mat-icon>login</mat-icon>
+        {{ loading ? 'Connexion…' : 'Se connecter' }}
+      </button>
+    </form>
+  </mat-card>
+</div>

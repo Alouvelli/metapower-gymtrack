@@ -1,0 +1,66 @@
+<div class="page-header">
+  <div>
+    <h1>Tableau de bord</h1>
+    <p class="muted">Vue d'ensemble du réseau METAPOWER GYM</p>
+  </div>
+  <mat-form-field appearance="outline" class="site-filter">
+    <mat-label>Site</mat-label>
+    <mat-select [(ngModel)]="siteId" (selectionChange)="changerSite()">
+      <mat-option [value]="null">Tous les sites</mat-option>
+      <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="kpi-grid" *ngIf="stats; else loadTpl">
+  <mat-card class="kpi blue">
+    <mat-icon>group</mat-icon>
+    <div>
+      <div class="value">{{ stats.membresActifs }}</div>
+      <div class="label">Membres actifs</div>
+    </div>
+  </mat-card>
+  <mat-card class="kpi orange">
+    <mat-icon>warning</mat-icon>
+    <div>
+      <div class="value">{{ stats.membresSuspendus + stats.membresExpires }}</div>
+      <div class="label">Suspendus / expirés</div>
+    </div>
+  </mat-card>
+  <mat-card class="kpi green">
+    <mat-icon>qr_code_scanner</mat-icon>
+    <div>
+      <div class="value">{{ stats.pointagesAujourdhui }}</div>
+      <div class="label">Pointages aujourd'hui</div>
+    </div>
+  </mat-card>
+  <mat-card class="kpi purple">
+    <mat-icon>confirmation_number</mat-icon>
+    <div>
+      <div class="value">{{ stats.ticketsAujourdhui }}</div>
+      <div class="label">Tickets vendus aujourd'hui</div>
+    </div>
+  </mat-card>
+</div>
+
+<div class="row" *ngIf="stats">
+  <mat-card class="ca-card">
+    <h3>Chiffre d'affaires du mois</h3>
+    <div class="ca-total">{{ formatFcfa(stats.totalCaMois) }}</div>
+    <div class="ca-detail">
+      <span>Mensualités&nbsp;: <strong>{{ formatFcfa(stats.caMensualitesMois) }}</strong></span>
+      <span>Tickets&nbsp;: <strong>{{ formatFcfa(stats.caTicketsMois) }}</strong></span>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card">
+    <h3>Répartition CA</h3>
+    <div class="chart-wrap">
+      <canvas #caChart></canvas>
+    </div>
+  </mat-card>
+</div>
+
+<ng-template #loadTpl>
+  <div class="loading"><mat-spinner diameter="40"></mat-spinner></div>
+</ng-template>

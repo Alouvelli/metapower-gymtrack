@@ -1,0 +1,58 @@
+<div class="page-header">
+  <a mat-icon-button routerLink="/membres"><mat-icon>arrow_back</mat-icon></a>
+  <div class="grow">
+    <h1 *ngIf="membre">{{ membre.nom }} {{ membre.prenom }}</h1>
+    <p class="muted" *ngIf="membre">{{ membre.numeroCarte }}</p>
+  </div>
+  <button mat-stroked-button (click)="imprimerCarte()">
+    <mat-icon>print</mat-icon> Imprimer la carte
+  </button>
+</div>
+
+<mat-tab-group *ngIf="membre">
+  <mat-tab label="Informations">
+    <div class="info-grid">
+      <mat-card>
+        <h3>Coordonnées</h3>
+        <p><strong>Téléphone :</strong> {{ membre.telephone }}</p>
+        <p><strong>Email :</strong> {{ membre.email || '—' }}</p>
+        <p><strong>Date de naissance :</strong> {{ membre.dateNaissance || '—' }}</p>
+        <p><strong>Plan :</strong> {{ membre.plan?.nom || '—' }}</p>
+        <p><strong>Statut :</strong> {{ membre.statut }}</p>
+      </mat-card>
+      <mat-card class="qr-card">
+        <h3>Carte QR</h3>
+        <img *ngIf="qrUrl" [src]="qrUrl" alt="QR membre" class="qr-img">
+        <p class="qr-help">Scanner cette carte au tourniquet pour pointer.</p>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Mensualités">
+    <table mat-table [dataSource]="mensualites" class="full mt">
+      <ng-container matColumnDef="mois">
+        <th mat-header-cell *matHeaderCellDef>Mois</th>
+        <td mat-cell *matCellDef="let m">{{ m.moisConcerne }}</td>
+      </ng-container>
+      <ng-container matColumnDef="montant">
+        <th mat-header-cell *matHeaderCellDef>Montant</th>
+        <td mat-cell *matCellDef="let m">{{ m.montant }} FCFA</td>
+      </ng-container>
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef>Date paiement</th>
+        <td mat-cell *matCellDef="let m">{{ m.datePaiement || '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="mode">
+        <th mat-header-cell *matHeaderCellDef>Mode</th>
+        <td mat-cell *matCellDef="let m">{{ m.modePaiement || '—' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="statut">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let m">{{ m.statut }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="['mois','montant','date','mode','statut']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['mois','montant','date','mode','statut'];"></tr>
+    </table>
+    <p class="empty" *ngIf="!mensualites.length">Aucune mensualité enregistrée.</p>
+  </mat-tab>
+</mat-tab-group>

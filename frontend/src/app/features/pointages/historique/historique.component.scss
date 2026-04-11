@@ -1,0 +1,24 @@
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+  h1 { margin: 0 0 4px; color: #1F3864; }
+  .muted { margin: 0; color: #888; font-size: 13px; }
+  .site-filter { width: 220px; }
+}
+.table-card { padding: 16px; }
+.full { width: 100%; }
+.ico {
+  font-size: 18px; width: 18px; height: 18px;
+  vertical-align: middle; margin-right: 6px;
+  &.member { color: #1F3864; }
+  &.ticket { color: #FFC107; }
+}
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fadbd8; color: #b03a2e;
+  &.ok { background: #d4f5e0; color: #1d8348; }
+}
+.empty { text-align: center; color: #999; padding: 24px; }

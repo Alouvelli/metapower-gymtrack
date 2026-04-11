@@ -1,0 +1,20 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  h1 { margin: 0; color: #1F3864; }
+}
+.form-card { padding: 24px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+  @media (max-width: 700px) { grid-template-columns: 1fr; }
+}
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

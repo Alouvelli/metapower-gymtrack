@@ -1,0 +1,50 @@
+.page-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+  h1 { margin: 0 0 4px; color: #1F3864; }
+  .muted { margin: 0; color: #888; font-size: 13px; }
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.site-card { padding: 18px; }
+.head {
+  display: flex; align-items: center; gap: 12px;
+  mat-icon { color: #1F3864; }
+  .nom { font-weight: 700; color: #1F3864; }
+  .addr { font-size: 12px; color: #888; }
+  .grow { flex: 1; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: #ccc;
+    &.on { background: #2ecc71; }
+  }
+}
+.meta {
+  display: flex; flex-direction: column; gap: 4px;
+  margin: 12px 0;
+  font-size: 13px; color: #555;
+  mat-icon { font-size: 16px; height: 16px; width: 16px; vertical-align: middle; color: #888; }
+}
+.actions {
+  display: flex; justify-content: flex-end; gap: 6px;
+}
+
+.form-card {
+  margin-top: 20px;
+  padding: 24px;
+  h3 { margin: 0 0 16px; color: #1F3864; }
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+  align-items: center;
+  .span2 { grid-column: 1 / -1; }
+  .actions { grid-column: 1 / -1; justify-content: flex-end; gap: 12px; }
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    .span2 { grid-column: auto; }
+  }
+}

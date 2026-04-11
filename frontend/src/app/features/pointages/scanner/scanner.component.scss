@@ -1,0 +1,107 @@
+.scanner-page {
+  min-height: 100vh;
+  background: #0d1424;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: #1F3864;
+  border-bottom: 3px solid #FFC107;
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    mat-icon { color: #FFC107; }
+  }
+  .site-info { display: flex; align-items: center; gap: 8px; opacity: 0.9; }
+}
+
+.config {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 30px;
+
+  mat-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 30px;
+    color: #333;
+
+    h2 { margin: 0 0 4px; color: #1F3864; }
+    p { color: #666; margin-bottom: 20px; }
+  }
+  .full { width: 100%; }
+}
+
+.scan-zone {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  zxing-scanner {
+    width: 100%;
+    max-width: 600px;
+    display: block;
+  }
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .reticle {
+    width: 280px;
+    height: 280px;
+    border: 4px solid #FFC107;
+    border-radius: 16px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+  }
+  p { margin-top: 24px; font-size: 18px; opacity: 0.85; }
+}
+
+.result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: rgba(0,0,0,0.85);
+  animation: fade 0.3s ease;
+
+  mat-icon { font-size: 120px; width: 120px; height: 120px; }
+  h2 { margin: 12px 0; font-size: 32px; }
+  .info {
+    display: flex; flex-direction: column;
+    strong { font-size: 22px; }
+    span { opacity: 0.8; margin-top: 4px; }
+  }
+  .motif { font-size: 18px; opacity: 0.85; margin-top: 6px; }
+
+  &.ok { background: rgba(29, 131, 72, 0.92); }
+  &.ko { background: rgba(176, 58, 46, 0.92); }
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
