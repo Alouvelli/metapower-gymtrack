@@ -1,0 +1,18 @@
+/* METAPOWER GymTrack — styles globaux */
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #f5f6fa;
+}
+
+.full-width { width: 100%; }
+.spacer { flex: 1 1 auto; }
+
+/* Couleurs marque METAPOWER */
+:root {
+  --mp-primary: #1F3864;
+  --mp-accent: #E74C3C;
+  --mp-success: #27AE60;
+  --mp-warning: #F39C12;
+}

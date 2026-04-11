@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: gymtrack
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/gymtrack_db}
+    username: ${DB_USERNAME:gymtrack}
+    password: ${DB_PASSWORD:passer}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: 587
+    username: ${MAIL_USERNAME:no-reply@metapower.sn}
+    password: ${MAIL_PASSWORD:changeme}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+jwt:
+  secret-key: ${JWT_SECRET:9faa372517ac1d389758d3750fc07ac00f542277f26fec1ce4593e93f64e3380}
+  expiration-hours: 8
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:4200}
+  device-access-key: ${DEVICE_ACCESS_KEY:changeme-device-key}
+  admin-default-password: ${ADMIN_DEFAULT_PASSWORD:passer123}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    sn.metapower.gymtrack: INFO
+    org.springframework.security: INFO
