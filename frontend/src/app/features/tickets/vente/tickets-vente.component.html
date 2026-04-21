@@ -67,12 +67,13 @@
 
   <mat-card class="recu" *ngIf="dernier">
     <h3>Ticket émis</h3>
-    <div class="numero">{{ dernier.ticket.numero }}</div>
-    <img [src]="'data:image/png;base64,' + dernier.qrImageBase64" class="qr">
+    <div class="numero">{{ dernier.numero }}</div>
+    <img [src]="'data:image/png;base64,' + dernier.qrCodeBase64" class="qr" alt="QR Code ticket">
     <div class="info">
-      <div>Prix : <strong>{{ dernier.ticket.prix }} FCFA</strong></div>
-      <div>Validité : <strong>{{ dernier.ticket.dateValidite }}</strong></div>
-      <div *ngIf="dernier.ticket.nomClient">Client : {{ dernier.ticket.nomClient }}</div>
+      <div>Salle : <strong>{{ dernier.siteNom }}</strong></div>
+      <div>Prix : <strong>{{ dernier.prix }} FCFA</strong></div>
+      <div>Validité : <strong>{{ dernier.dateValidite | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+      <div *ngIf="dernier.nomClient">Client : {{ dernier.nomClient }}</div>
     </div>
     <button mat-stroked-button color="primary" (click)="imprimerRecu()">
       <mat-icon>print</mat-icon> Imprimer le reçu

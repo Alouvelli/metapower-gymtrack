@@ -11,8 +11,13 @@ public record DashboardStats(
         // Activité du jour
         long pointagesAujourdhui,
         long ticketsVendusAujourdhui,
+        // Chiffre d'affaires du jour
+        long caJournalier,
         // Chiffre d'affaires du mois
         long caMensualitesMois,
         long caTicketsMois,
-        long caTotalMois
+        long caTotalMois,
+        // Recouvrement mensuel
+        long membresPayesCeMois,
+        double tauxRecouvrement   // en pourcentage, arrondi 1 décimale
 ) {}

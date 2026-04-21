@@ -65,16 +65,32 @@ public class DashboardService {
                 ? ticketRepository.countBySiteAndDatePaiementBetween(site, dayStart, dayEnd)
                 : ticketRepository.countByDatePaiementBetween(dayStart, dayEnd);
 
+        // CA du jour
+        long caMensualitesJour = mensualiteRepository.sumMontantByStatutAndPeriod(
+                StatutPaiement.PAYE, today, today);
+        long caTicketsJour = ticketRepository.sumCaByPeriodAndSite(dayStart, dayEnd, siteId);
+        long caJournalier = caMensualitesJour + caTicketsJour;
+
         // CA du mois — mensualités globales (pas de notion de site sur Mensualite)
         long caMensualites = mensualiteRepository.sumMontantByStatutAndPeriod(
                 StatutPaiement.PAYE, monthStart, monthEnd);
         long caTickets = ticketRepository.sumCaByPeriodAndSite(monthStartI, monthEndI, siteId);
 
+        // Taux de recouvrement mensuel
+        LocalDate premierDuMois = today.withDayOfMonth(1);
+        long membresPayesCeMois = mensualiteRepository.countMembresPayesPourMois(
+                StatutPaiement.PAYE, premierDuMois);
+        double tauxRecouvrement = actifs > 0
+                ? Math.round((membresPayesCeMois * 1000.0 / actifs)) / 10.0
+                : 0.0;
+
         return new DashboardStats(
                 siteId, siteNom,
                 actifs, enRetard, suspendus,
                 pointagesJour, ticketsJour,
-                caMensualites, caTickets, caMensualites + caTickets
+                caJournalier,
+                caMensualites, caTickets, caMensualites + caTickets,
+                membresPayesCeMois, tauxRecouvrement
         );
     }
 }

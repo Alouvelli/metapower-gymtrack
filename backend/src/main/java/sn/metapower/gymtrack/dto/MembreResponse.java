@@ -18,7 +18,8 @@ public record MembreResponse(
         String qrCodeToken,
         StatutMembre statut,
         Long planId,
-        String planNom
+        String planNom,
+        Integer planPrix
 ) {
     public static MembreResponse from(Membre m) {
         return new MembreResponse(
@@ -34,7 +35,8 @@ public record MembreResponse(
                 m.getQrCodeToken(),
                 m.getStatut(),
                 m.getPlan() != null ? m.getPlan().getId() : null,
-                m.getPlan() != null ? m.getPlan().getNom() : null
+                m.getPlan() != null ? m.getPlan().getNom() : null,
+                m.getPlan() != null ? m.getPlan().getPrix() : null
         );
     }
 }

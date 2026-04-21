@@ -1,34 +1,54 @@
 <mat-sidenav-container class="layout">
   <mat-sidenav mode="side" opened class="sidebar">
     <div class="brand">
-      <mat-icon>fitness_center</mat-icon>
-      <div>
+      <div class="brand-logo">
+        <i class="fas fa-dumbbell"></i>
+      </div>
+      <div class="brand-text">
         <div class="brand-title">METAPOWER</div>
         <div class="brand-sub">GymTrack</div>
       </div>
     </div>
-    <mat-divider></mat-divider>
-    <mat-nav-list>
-      <a *ngFor="let item of nav" mat-list-item [routerLink]="item.route" routerLinkActive="active">
-        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-        <span matListItemTitle>{{ item.label }}</span>
+
+    <nav class="nav-list">
+      <a *ngFor="let item of nav; let i = index"
+         class="nav-link"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         [style.animation-delay.s]="i * 0.05">
+        <span class="nav-icon"><i [class]="item.icon"></i></span>
+        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-indicator"></span>
       </a>
-    </mat-nav-list>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version-tag">v1.0 · Pilote</div>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar class="topbar">
-      <span class="title">Gestion centralisée multisite</span>
-      <span class="spacer"></span>
-      <button mat-icon-button [matMenuTriggerFor]="menu">
-        <mat-icon>account_circle</mat-icon>
-      </button>
-      <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon><span>Déconnexion</span>
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title">Gestion centralisée multisite</span>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" matTooltip="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="topbar-dot"></span>
         </button>
-      </mat-menu>
-    </mat-toolbar>
+        <button class="user-btn" [matMenuTriggerFor]="menu">
+          <span class="user-avatar">A</span>
+          <span class="user-name">Admin</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <mat-menu #menu="matMenu" xPosition="before">
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon><span>Déconnexion</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
 
     <div class="content">
       <router-outlet></router-outlet>

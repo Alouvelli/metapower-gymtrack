@@ -53,7 +53,7 @@ export class TicketsVenteComponent implements OnInit {
       next: r => {
         this.dernier = r;
         this.loading = false;
-        this.snack.open('Ticket vendu — N° ' + r.ticket.numero, 'OK', { duration: 3000 });
+        this.snack.open('Ticket vendu — N° ' + r.numero, 'OK', { duration: 3000 });
         this.form.patchValue({ nomClient: '', telephoneClient: '' });
       },
       error: () => {
@@ -64,7 +64,7 @@ export class TicketsVenteComponent implements OnInit {
   }
 
   imprimerRecu() {
-    if (!this.dernier?.ticket?.id) return;
-    window.open(`${environment.apiUrl}/api/tickets/${this.dernier.ticket.id}/recu`, '_blank');
+    if (!this.dernier?.id) return;
+    window.open(`${environment.apiUrl}/api/tickets/${this.dernier.id}/recu`, '_blank');
   }
 }

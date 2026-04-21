@@ -36,7 +36,16 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.charger();
-    this.membreSvc.liste().subscribe(m => this.membres = m);
+    this.membreSvc.liste().subscribe(m => {
+      this.membres = m;
+    });
+    // Auto-remplir le montant depuis le plan du membre sélectionné
+    this.form.get('membreId')!.valueChanges.subscribe(id => {
+      const membre = this.membres.find(m => m.id === id);
+      if (membre?.planPrix) {
+        this.form.patchValue({ montant: membre.planPrix });
+      }
+    });
   }
 
   ngAfterViewInit() { this.ds.paginator = this.paginator; }

@@ -30,6 +30,8 @@ export interface Membre {
   statut?: StatutMembre;
   plan?: PlanAbonnement;
   planId?: number;
+  planNom?: string;
+  planPrix?: number;
 }
 
 export type ModePaiement = 'ESPECES' | 'WAVE' | 'ORANGE_MONEY' | 'CARTE' | 'VIREMENT';
@@ -73,8 +75,16 @@ export interface TicketEntree {
 }
 
 export interface TicketVenteResponse {
-  ticket: TicketEntree;
-  qrImageBase64: string;
+  id: number;
+  numero: string;
+  qrCodeToken: string;
+  qrCodeBase64: string;
+  siteId: number;
+  siteNom: string;
+  prix: number;
+  modePaiement: string;
+  dateValidite: string;
+  nomClient?: string;
 }
 
 export interface ScanResponse {
@@ -87,14 +97,19 @@ export interface ScanResponse {
 }
 
 export interface DashboardStats {
+  siteId?: number;
+  siteNom?: string;
   membresActifs: number;
+  membresEnRetard: number;
   membresSuspendus: number;
-  membresExpires: number;
   pointagesAujourdhui: number;
-  ticketsAujourdhui: number;
+  ticketsVendusAujourdhui: number;
+  caJournalier: number;
   caMensualitesMois: number;
   caTicketsMois: number;
-  totalCaMois: number;
+  caTotalMois: number;
+  membresPayesCeMois: number;
+  tauxRecouvrement: number;
 }
 
 export interface AppUser {

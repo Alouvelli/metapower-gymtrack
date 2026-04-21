@@ -21,4 +21,10 @@ public interface MensualiteRepository extends JpaRepository<Mensualite, Long> {
     long sumMontantByStatutAndPeriod(@Param("statut") StatutPaiement statut,
                                      @Param("from") LocalDate from,
                                      @Param("to") LocalDate to);
+
+    /** Nombre de membres distincts ayant payé leur mensualité pour un mois donné. */
+    @Query("SELECT COUNT(DISTINCT m.membre.id) FROM Mensualite m " +
+           "WHERE m.statut = :statut AND m.moisConcerne = :moisConcerne")
+    long countMembresPayesPourMois(@Param("statut") StatutPaiement statut,
+                                   @Param("moisConcerne") LocalDate moisConcerne);
 }

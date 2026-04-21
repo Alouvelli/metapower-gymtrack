@@ -74,6 +74,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/pointages/scan").hasAuthority("ROLE_DEVICE")
                         // Photos membres et reçus tickets en lecture publique
                         .requestMatchers("/files/view/**", "/files/download/**").permitAll()
+                        // Reçu PDF ticket — ouvert dans un nouvel onglet (pas de JWT possible)
+                        .requestMatchers("/api/tickets/*/recu").permitAll()
+                        // QR code membres — chargé via <img src> (pas de JWT possible)
+                        .requestMatchers("/api/membres/*/qrcode").permitAll()
                         // Tout le reste : JWT requis
                         .anyRequest().authenticated()
                 )

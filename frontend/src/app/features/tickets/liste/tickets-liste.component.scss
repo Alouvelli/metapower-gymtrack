@@ -1,18 +1,102 @@
+/* ═══════════════ TICKETS — Historique — Thème DOCADS ═══════════════ */
+:host { display: block; animation: fadeUp 0.4s var(--ease) both; }
+
 .page-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 20px;
-  h1 { margin: 0 0 4px; color: #1F3864; }
-  .muted { margin: 0; color: #888; font-size: 13px; }
+  position: relative;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 22px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  box-shadow: var(--shadow-primary);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  > * { position: relative; z-index: 1; }
+
+  h1 {
+    margin: 0 0 4px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .muted { margin: 0; color: rgba(255,255,255,0.85); font-size: 13px; }
+
+  a {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 10px !important;
+    padding: 0 18px !important;
+    font-weight: 600 !important;
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+
+    &:hover {
+      background: #fff !important;
+      color: var(--primary) !important;
+      transform: translateY(-2px);
+    }
+  }
 }
-.table-card { padding: 16px; }
+
+.table-card {
+  padding: 0 !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
 .full { width: 100%; }
+
+::ng-deep table.mat-mdc-table {
+  th.mat-mdc-header-cell {
+    background: #fafbff;
+    color: var(--text-secondary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 16px;
+  }
+  td.mat-mdc-cell {
+    color: var(--text-primary);
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border-light);
+    padding: 14px 16px;
+  }
+  tr.mat-mdc-row:hover { background: rgba(102, 126, 234, 0.04); }
+}
+
 .badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  background: #e8e8e8; color: #555;
-  &.ok { background: #d4f5e0; color: #1d8348; }
-  &.used { background: #d6eaf8; color: #1f618d; }
-  &.warn { background: #fadbd8; color: #b03a2e; }
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  background: rgba(148, 163, 184, 0.15); color: var(--text-secondary);
+  &.ok   { background: var(--success-light); color: var(--success); }
+  &.used { background: var(--info-light);    color: var(--info); }
+  &.warn { background: var(--danger-light);  color: var(--danger); }
 }

@@ -24,6 +24,10 @@
       <input matInput type="month" formControlName="moisConcerne">
     </mat-form-field>
     <mat-form-field appearance="outline">
+      <mat-label>Montant (FCFA)</mat-label>
+      <input matInput type="number" formControlName="montant" min="0">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
       <mat-label>Mode de paiement</mat-label>
       <mat-select formControlName="modePaiement">
         <mat-option value="ESPECES">Espèces</mat-option>

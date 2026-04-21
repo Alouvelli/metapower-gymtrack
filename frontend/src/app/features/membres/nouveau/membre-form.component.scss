@@ -1,20 +1,67 @@
+/* ═══════════════ MEMBRE FORM — Thème DOCADS ═══════════════ */
+:host { display: block; animation: fadeUp 0.4s var(--ease) both; }
+
 .page-header {
+  position: relative;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-lg);
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  color: #fff;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  h1 { margin: 0; color: #1F3864; }
+  gap: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-primary);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  > * { position: relative; z-index: 1; }
+
+  h1 {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+
+  ::ng-deep .mat-mdc-icon-button {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
-.form-card { padding: 24px; }
+
+.form-card {
+  padding: 32px !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm) !important;
+  background: var(--bg-card);
+  animation: fadeUp 0.5s var(--ease) both;
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 14px 20px;
   @media (max-width: 700px) { grid-template-columns: 1fr; }
 }
+
 .actions {
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  margin-top: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-light);
 }
