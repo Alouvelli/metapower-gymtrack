@@ -51,6 +51,7 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
     const payload = {
       membreId: v.membreId,
       moisConcerne: v.moisConcerne + '-01',
+      montant: v.montant,
       modePaiement: v.modePaiement,
       reference: v.reference
     };

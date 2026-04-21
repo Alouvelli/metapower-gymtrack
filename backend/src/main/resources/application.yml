@@ -3,8 +3,8 @@ spring:
     name: gymtrack
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/gymtrack_db}
-    username: ${DB_USERNAME:gymtrack}
-    password: ${DB_PASSWORD:passer}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:M@wdosy1.}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -14,7 +14,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
-    open-in-view: false
+    open-in-view: true
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -22,8 +22,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: 587
-    username: ${MAIL_USERNAME:no-reply@metapower.sn}
-    password: ${MAIL_PASSWORD:changeme}
+    username: ${MAIL_USERNAME:no-reply@groupeisi.com}
+    password: ${MAIL_PASSWORD:kdow lhlf hbww jcat}
     properties:
       mail:
         smtp:

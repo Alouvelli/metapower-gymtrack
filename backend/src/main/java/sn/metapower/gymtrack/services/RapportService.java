@@ -1,10 +1,21 @@
 package sn.metapower.gymtrack.services;
 
-import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import org.apache.poi.ss.usermodel.*;
+import com.lowagie.text.Font;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import sn.metapower.gymtrack.entities.Mensualite;
@@ -211,7 +222,7 @@ public class RapportService {
 
     private CellStyle headerStyle(Workbook wb) {
         CellStyle style = wb.createCellStyle();
-        Font font = wb.createFont();
+        org.apache.poi.ss.usermodel.Font font = wb.createFont();
         font.setBold(true);
         font.setColor(IndexedColors.WHITE.getIndex());
         style.setFont(font);
