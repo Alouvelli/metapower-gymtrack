@@ -23,4 +23,22 @@ public interface TicketEntreeRepository extends JpaRepository<TicketEntree, Long
     long sumCaByPeriodAndSite(@Param("from") Instant from,
                               @Param("to") Instant to,
                               @Param("siteId") Long siteId);
+
+    // ── Requêtes filtrées par gérant (vendeur) ─────────────────────────────────
+
+    List<TicketEntree> findByVendeurId(Long userId);
+
+    @Query("SELECT COALESCE(SUM(t.prix), 0) FROM TicketEntree t " +
+           "WHERE t.vendeur.id = :userId " +
+           "AND t.datePaiement BETWEEN :from AND :to")
+    long sumCaByUserAndPeriod(@Param("userId") Long userId,
+                              @Param("from") Instant from,
+                              @Param("to") Instant to);
+
+    @Query("SELECT COUNT(t) FROM TicketEntree t " +
+           "WHERE t.vendeur.id = :userId " +
+           "AND t.datePaiement BETWEEN :from AND :to")
+    long countByUserAndPeriod(@Param("userId") Long userId,
+                              @Param("from") Instant from,
+                              @Param("to") Instant to);
 }

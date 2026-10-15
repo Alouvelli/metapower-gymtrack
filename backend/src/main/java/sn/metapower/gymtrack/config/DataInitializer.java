@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        List.of("ROLE_ADMIN", "ROLE_RECEPTIONNISTE", "ROLE_CAISSIER").forEach(name ->
+        List.of("ROLE_ADMIN", "ROLE_RECEPTIONNISTE", "ROLE_CAISSIER", "ROLE_GERANT").forEach(name ->
                 roleRepository.findByRoleName(name)
                         .orElseGet(() -> roleRepository.save(new AppRole(name))));
 

@@ -54,14 +54,14 @@
       <h2>{{ result.autorise ? 'Accès autorisé' : 'Accès refusé' }}</h2>
 
       <div class="info" *ngIf="result.autorise && result.type === 'MEMBRE'">
-        <strong>{{ result.membre?.nom }} {{ result.membre?.prenom }}</strong>
-        <span>{{ result.membre?.numeroCarte }}</span>
+        <strong>{{ result.nom }} {{ result.prenom }}</strong>
+        <span>{{ result.numero }}<ng-container *ngIf="result.planNom"> · {{ result.planNom }}</ng-container></span>
       </div>
       <div class="info" *ngIf="result.autorise && result.type === 'TICKET'">
-        <strong>Ticket {{ result.ticket?.numero }}</strong>
-        <span>{{ result.ticket?.tarif?.libelle }}</span>
+        <strong>Ticket {{ result.numero }}</strong>
+        <span *ngIf="result.dateValidite">Valable le {{ result.dateValidite | date:'dd/MM/yyyy' }}</span>
       </div>
-      <div class="motif" *ngIf="!result.autorise">{{ result.motif }}</div>
+      <div class="motif" *ngIf="!result.autorise">{{ result.motifRefus }}</div>
     </div>
   </div>
 

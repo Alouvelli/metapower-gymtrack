@@ -60,7 +60,7 @@ export class ScannerComponent implements OnInit {
         setTimeout(() => { this.result = undefined; this.scanning = true; }, 4000);
       },
       error: () => {
-        this.result = { autorise: false, motif: 'ERREUR_RESEAU' };
+        this.result = { autorise: false, motifRefus: 'ERREUR_RESEAU' };
         setTimeout(() => { this.result = undefined; this.scanning = true; }, 3000);
       }
     });

@@ -1,7 +1,7 @@
-<div class="dashboard-wrapper">
+<div class="dashboard-wrapper" *ngIf="stats; else loadTpl">
 
-  <!-- HERO HEADER -->
-  <header class="hero-header" *ngIf="stats">
+  <!-- ──── HERO HEADER ──── -->
+  <div class="hero-header">
     <div class="hero-bg-shape s1"></div>
     <div class="hero-bg-shape s2"></div>
     <div class="hero-bg-shape s3"></div>
@@ -10,110 +10,116 @@
       <div class="hero-left">
         <div class="avatar-block">
           <div class="avatar-ring"></div>
-          <div class="avatar-inner">MP</div>
+          <div class="avatar-inner">{{ isGerant ? (gerantNom.charAt(0) || 'G') : 'A' }}</div>
           <div class="avatar-status online"></div>
         </div>
         <div class="hero-greeting">
-          <h1>{{ getGreeting() }}, <span class="hl">Administrateur</span></h1>
+          <h1>{{ getGreeting() }}, <span class="hl"><strong>{{ isGerant ? gerantNom : 'Administrateur' }}</strong></span></h1>
           <p class="hero-sub">{{ getCurrentDate() }} — Réseau METAPOWER GYM</p>
           <div class="hero-badges">
-            <span class="hero-badge"><i class="fas fa-building"></i> {{ stats.siteNom || 'Toutes les salles' }}</span>
-            <span class="hero-badge"><i class="fas fa-users"></i> {{ stats.membresActifs }} membres actifs</span>
-            <span class="hero-badge"><i class="fas fa-chart-line"></i> {{ stats.tauxRecouvrement }}% recouvrement</span>
+            <span class="hero-badge"><i class="fas fa-building"></i> {{ stats.siteNom || (isGerant ? gerantSiteNom : 'Tous les sites') }}</span>
+            <span class="hero-badge" *ngIf="isGerant && gerantCreneau">
+              <i class="fas fa-clock"></i> {{ gerantCreneau }}
+            </span>
+            <span class="hero-badge"><i class="fas fa-wifi"></i> En ligne</span>
           </div>
         </div>
       </div>
 
-      <div class="hero-right">
-        <mat-form-field appearance="outline" class="site-filter-hero">
-          <mat-label>Site</mat-label>
-          <mat-select [(ngModel)]="siteId" (selectionChange)="changerSite()">
-            <mat-option [value]="null">Tous les sites</mat-option>
-            <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <!-- Site selector: admin only -->
+      <mat-form-field appearance="outline" class="site-filter-hero" *ngIf="!isGerant">
+        <mat-label>Site</mat-label>
+        <mat-select [(ngModel)]="siteId" (selectionChange)="changerSite()">
+          <mat-option [value]="null">Tous les sites</mat-option>
+          <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Gérant créneau card -->
+      <div class="gerant-creneau-card" *ngIf="isGerant && gerantSiteNom">
+        <div class="gcc-icon"><i class="fas fa-user-tie"></i></div>
+        <div class="gcc-info">
+          <span class="gcc-site">{{ gerantSiteNom }}</span>
+          <span class="gcc-creneau">{{ gerantCreneau }}</span>
+        </div>
       </div>
     </div>
-  </header>
+  </div>
 
-  <!-- CONTENU DASHBOARD -->
-  <div class="dashboard-content" *ngIf="stats; else loadTpl">
+  <!-- ──── CONTENT ──── -->
+  <div class="dashboard-content">
 
-    <!-- 6 KPI CARDS -->
+    <!-- 6 KPI CARDS — style analytics, grille 3×2 -->
     <div class="stats-grid-6">
-      <div class="stat-card">
-        <div class="stat-card-inner">
-          <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-          <div class="stat-content">
-            <span class="stat-number">{{ stats.membresActifs }}</span>
-            <span class="stat-label">Membres actifs</span>
-          </div>
+
+      <div class="kpi-card" style="--delay:.08s">
+        <div class="kpi-left">
+          <div class="kpi-meta">Membres actifs</div>
+          <div class="kpi-value">{{ stats.membresActifs }}</div>
+          <span class="kpi-delta up"><i class="fas fa-arrow-up"></i> En règle</span>
         </div>
-        <div class="stat-bar"><div class="stat-bar-fill blue" [style.width.%]="100"></div></div>
+        <div class="kpi-icon" style="animation-delay:.1s"><i class="fas fa-users"></i></div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-card-inner">
-          <div class="stat-icon amber"><i class="fas fa-triangle-exclamation"></i></div>
-          <div class="stat-content">
-            <span class="stat-number">{{ stats.membresSuspendus + stats.membresEnRetard }}</span>
-            <span class="stat-label">Suspendus / Expirés</span>
-          </div>
+      <div class="kpi-card" style="--delay:.16s">
+        <div class="kpi-left">
+          <div class="kpi-meta">Suspendus / Expirés</div>
+          <div class="kpi-value">{{ stats.membresSuspendus + stats.membresEnRetard }}</div>
+          <span class="kpi-delta" [class.dn]="getPctSuspendus() > 0" [class.ok]="getPctSuspendus() === 0">
+            <i class="fas" [class.fa-exclamation-triangle]="getPctSuspendus() > 0" [class.fa-check]="getPctSuspendus() === 0"></i>
+            {{ getPctSuspendus() > 0 ? getPctSuspendus() + '% du total' : 'Aucun' }}
+          </span>
         </div>
-        <div class="stat-bar"><div class="stat-bar-fill amber" [style.width.%]="getPctSuspendus()"></div></div>
+        <div class="kpi-icon amber" style="animation-delay:.55s"><i class="fas fa-triangle-exclamation"></i></div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-card-inner">
-          <div class="stat-icon green"><i class="fas fa-qrcode"></i></div>
-          <div class="stat-content">
-            <span class="stat-number">{{ stats.pointagesAujourdhui }}</span>
-            <span class="stat-label">Pointages aujourd'hui</span>
-          </div>
+      <div class="kpi-card" style="--delay:.24s">
+        <div class="kpi-left">
+          <div class="kpi-meta">Pointages aujourd'hui</div>
+          <div class="kpi-value">{{ stats.pointagesAujourdhui }}</div>
+          <span class="kpi-delta up"><i class="fas fa-circle-dot"></i> Aujourd'hui</span>
         </div>
-        <div class="stat-bar"><div class="stat-bar-fill green" [style.width.%]="100"></div></div>
+        <div class="kpi-icon green" style="animation-delay:1s"><i class="fas fa-qrcode"></i></div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-card-inner">
-          <div class="stat-icon purple"><i class="fas fa-ticket"></i></div>
-          <div class="stat-content">
-            <span class="stat-number">{{ stats.ticketsVendusAujourdhui }}</span>
-            <span class="stat-label">Tickets vendus aujourd'hui</span>
-          </div>
+      <div class="kpi-card" style="--delay:.32s">
+        <div class="kpi-left">
+          <div class="kpi-meta">Tickets vendus</div>
+          <div class="kpi-value">{{ stats.ticketsVendusAujourdhui }}</div>
+          <span class="kpi-delta up"><i class="fas fa-circle-dot"></i> Aujourd'hui</span>
         </div>
-        <div class="stat-bar"><div class="stat-bar-fill purple" [style.width.%]="100"></div></div>
+        <div class="kpi-icon violet" style="animation-delay:1.45s"><i class="fas fa-ticket"></i></div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-card-inner">
-          <div class="stat-icon sky"><i class="fas fa-coins"></i></div>
-          <div class="stat-content">
-            <span class="stat-number money">{{ formatFcfa(stats.caJournalier) }}</span>
-            <span class="stat-label">CA du jour</span>
-          </div>
+      <div class="kpi-card" style="--delay:.40s">
+        <div class="kpi-left">
+          <div class="kpi-meta">Chiffre d'Affaire du jour</div>
+          <div class="kpi-value small">{{ formatFcfaShort(stats.caJournalier) }}</div>
+          <span class="kpi-delta up"><i class="fas fa-arrow-up"></i> FCFA encaissés</span>
         </div>
-        <div class="stat-bar"><div class="stat-bar-fill sky" [style.width.%]="100"></div></div>
+        <div class="kpi-icon sky" style="animation-delay:1.9s"><i class="fas fa-coins"></i></div>
       </div>
 
-      <div class="stat-card highlight">
-        <div class="stat-card-inner">
-          <div class="stat-icon white"><i class="fas fa-chart-pie"></i></div>
-          <div class="stat-content">
-            <span class="stat-number">{{ stats.tauxRecouvrement }}%</span>
-            <span class="stat-label">Recouvrement ({{ stats.membresPayesCeMois }}/{{ stats.membresActifs }})</span>
-          </div>
+      <div class="kpi-card kpi-hl" style="--delay:.48s">
+        <div class="kpi-left">
+          <div class="kpi-meta">Recouvrement mensuel</div>
+          <div class="kpi-value">{{ stats.tauxRecouvrement }}%</div>
+          <span class="kpi-delta" [class.up]="stats.tauxRecouvrement >= 80" [class.mid]="stats.tauxRecouvrement >= 50 && stats.tauxRecouvrement < 80" [class.dn]="stats.tauxRecouvrement < 50">
+            <i class="fas fa-check"></i> {{ stats.membresPayesCeMois }}/{{ stats.membresActifs }} payés
+          </span>
         </div>
-        <div class="stat-bar light"><div class="stat-bar-fill white" [style.width.%]="stats.tauxRecouvrement"></div></div>
+        <div class="kpi-icon white" style="animation-delay:2.35s"><i class="fas fa-chart-pie"></i></div>
       </div>
+
     </div>
 
     <!-- CHARTS ROW -->
     <div class="charts-row">
-      <!-- Doughnut CA -->
+
+      <!-- Donut CA -->
       <div class="chart-card">
         <div class="card-header">
-          <h3><i class="fas fa-chart-pie"></i> Chiffre d'affaires du mois</h3>
+          <h3><i class="fas fa-chart-pie"></i> CA du mois</h3>
           <span class="chart-tag">FCFA</span>
         </div>
         <div class="card-body">
@@ -126,13 +132,13 @@
           </div>
           <div class="chart-legend">
             <div class="legend-item">
-              <span class="legend-dot" style="background:#667eea"></span>
+              <div class="legend-dot" style="background:#667eea"></div>
               <span class="legend-text">Mensualités</span>
               <span class="legend-value">{{ formatFcfa(stats.caMensualitesMois) }}</span>
               <span class="legend-percent">{{ getPctMensualites() }}%</span>
             </div>
             <div class="legend-item">
-              <span class="legend-dot" style="background:#f59e0b"></span>
+              <div class="legend-dot" style="background:#f59e0b"></div>
               <span class="legend-text">Tickets</span>
               <span class="legend-value">{{ formatFcfa(stats.caTicketsMois) }}</span>
               <span class="legend-percent">{{ getPctTickets() }}%</span>
@@ -141,10 +147,10 @@
         </div>
       </div>
 
-      <!-- Bar chart activité -->
+      <!-- Bar chart Activité -->
       <div class="chart-card">
         <div class="card-header">
-          <h3><i class="fas fa-chart-column"></i> Activité du jour</h3>
+          <h3><i class="fas fa-chart-bar"></i> Activité du jour</h3>
           <span class="chart-tag accent">Aujourd'hui</span>
         </div>
         <div class="card-body">
@@ -152,18 +158,18 @@
             <canvas #activityChart></canvas>
           </div>
           <div class="chart-summary">
-            <div class="summary-item"><i class="fas fa-circle-check"></i> {{ stats.pointagesAujourdhui }} pointages</div>
-            <div class="summary-item"><i class="fas fa-circle-check"></i> {{ stats.ticketsVendusAujourdhui }} tickets vendus</div>
-            <div class="summary-item"><i class="fas fa-circle-check"></i> {{ formatFcfa(stats.caJournalier) }}</div>
+            <div class="summary-item"><i class="fas fa-circle-dot"></i> {{ stats.pointagesAujourdhui }} pointages</div>
+            <div class="summary-item"><i class="fas fa-circle-dot"></i> {{ stats.ticketsVendusAujourdhui }} tickets</div>
+            <div class="summary-item"><i class="fas fa-circle-dot"></i> {{ stats.membresActifs }} membres</div>
           </div>
         </div>
       </div>
+
     </div>
 
   </div>
-
-  <ng-template #loadTpl>
-    <div class="loading"><mat-spinner diameter="50"></mat-spinner></div>
-  </ng-template>
-
 </div>
+
+<ng-template #loadTpl>
+  <div class="loading"><mat-spinner diameter="48"></mat-spinner></div>
+</ng-template>

@@ -1,45 +1,170 @@
-<div class="page-header">
-  <div>
-    <h1>Tarifs des tickets</h1>
-    <p class="muted">Catalogue des passes vendus à la caisse</p>
+<div class="tarifs-wrapper">
+
+  <!-- ══════════ HERO ══════════ -->
+  <div class="tarifs-hero">
+    <div class="hero-deco"></div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-icon-wrap"><i class="fas fa-tags"></i></div>
+        <div class="hero-text">
+          <h1>Tarifs des tickets</h1>
+          <p>Catalogue des passes vendus à la caisse</p>
+        </div>
+      </div>
+      <button class="btn-add-hero" (click)="nouveau()">
+        <i class="fas fa-plus"></i>
+        <span>Nouveau tarif</span>
+      </button>
+    </div>
+    <div class="hero-stats">
+      <div class="h-stat">
+        <span class="h-stat-val">{{ tarifs.length }}</span>
+        <span class="h-stat-lbl">Total</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ tarifsActifs }}</span>
+        <span class="h-stat-lbl">Actifs</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ tarifsInactifs }}</span>
+        <span class="h-stat-lbl">Inactifs</span>
+      </div>
+    </div>
   </div>
-  <button mat-flat-button color="primary" (click)="nouveau()">
-    <mat-icon>add</mat-icon> Nouveau tarif
-  </button>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="tarifs-body">
+
+    <!-- GRID -->
+    <div class="tarifs-grid" *ngIf="tarifs.length > 0">
+      <div *ngFor="let t of tarifs; let i = index"
+           class="tarif-card"
+           [class.inactive]="t.actif === false"
+           [style.--delay]="(i * 0.07) + 's'">
+
+        <div class="card-stripe" [class.inactive]="t.actif === false"></div>
+
+        <div class="card-head">
+          <div class="tarif-icon"><i class="fas fa-ticket"></i></div>
+          <span class="status-pill" [class.active]="t.actif !== false">
+            <span class="pulse-dot" *ngIf="t.actif !== false"></span>
+            {{ t.actif !== false ? 'Actif' : 'Inactif' }}
+          </span>
+        </div>
+
+        <div class="tarif-name">{{ t.libelle }}</div>
+
+        <div class="tarif-price-block">
+          <span class="tarif-price">{{ t.prix | number }}</span>
+          <span class="tarif-currency">FCFA</span>
+        </div>
+
+        <div class="tarif-validity">
+          <i class="fas fa-clock"></i>
+          <span>{{ t.dureeValiditeHeures }}h de validité</span>
+        </div>
+
+        <div class="card-div"></div>
+
+        <div class="card-actions">
+          <button class="action-btn edit-btn" (click)="modifier(t)">
+            <i class="fas fa-pen"></i>
+            <span>Modifier</span>
+          </button>
+          <button class="action-btn del-btn" (click)="supprimer(t)" matTooltip="Supprimer">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state-custom" *ngIf="tarifs.length === 0">
+      <div class="empty-icon-wrap"><i class="fas fa-tags"></i></div>
+      <h3>Aucun tarif configuré</h3>
+      <p>Ajoutez votre premier tarif pour activer la vente de tickets à la caisse.</p>
+      <button class="btn-add-hero" (click)="nouveau()">
+        <i class="fas fa-plus"></i>
+        <span>Ajouter un tarif</span>
+      </button>
+    </div>
+
+  </div>
 </div>
 
-<div class="grid">
-  <mat-card *ngFor="let t of tarifs" class="tarif-card" [class.disabled]="t.actif === false">
-    <mat-icon>local_offer</mat-icon>
-    <h3>{{ t.libelle }}</h3>
-    <div class="prix">{{ t.prix }} FCFA</div>
-    <div class="duree">Validité : {{ t.dureeValiditeHeures }}h</div>
-    <div class="actions">
-      <button mat-button color="primary" (click)="modifier(t)"><mat-icon>edit</mat-icon></button>
-      <button mat-button color="warn" (click)="supprimer(t)"><mat-icon>delete</mat-icon></button>
-    </div>
-  </mat-card>
-</div>
+<!-- ══════════ MODAL ══════════ -->
+<div class="modal-backdrop" [class.show]="edit !== null" (click)="annuler()">
+  <div class="modal-panel" (click)="$event.stopPropagation()" *ngIf="edit !== null">
 
-<mat-card class="form-card" *ngIf="edit">
-  <h3>{{ edit.id ? 'Modifier' : 'Nouveau tarif' }}</h3>
-  <form [formGroup]="form" (ngSubmit)="enregistrer()" class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Libellé</mat-label>
-      <input matInput formControlName="libelle">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Prix (FCFA)</mat-label>
-      <input matInput type="number" formControlName="prix">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Validité (heures)</mat-label>
-      <input matInput type="number" formControlName="dureeValiditeHeures">
-    </mat-form-field>
-    <mat-checkbox formControlName="actif">Tarif actif</mat-checkbox>
-    <div class="actions-row">
-      <button mat-stroked-button type="button" (click)="edit = null">Annuler</button>
-      <button mat-flat-button color="primary" type="submit">Enregistrer</button>
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-icon">
+          <i class="fas" [class.fa-pen]="edit.id" [class.fa-plus]="!edit.id"></i>
+        </div>
+        <div>
+          <h3>{{ edit.id ? 'Modifier le tarif' : 'Nouveau tarif' }}</h3>
+          <p>{{ edit.id ? 'Mettez à jour ce tarif' : 'Créez un nouveau tarif de ticket' }}</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="annuler()"><i class="fas fa-times"></i></button>
     </div>
-  </form>
-</mat-card>
+
+    <div class="modal-body">
+      <form [formGroup]="form" (ngSubmit)="enregistrer()" class="site-form">
+
+        <div class="form-field">
+          <label>Libellé <span class="req">*</span></label>
+          <div class="field-wrap">
+            <i class="fas fa-tag field-ico"></i>
+            <input formControlName="libelle" placeholder="Ex : Pass journée, Séance découverte…">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-field">
+            <label>Prix (FCFA) <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-coins field-ico"></i>
+              <input formControlName="prix" type="number" min="0" placeholder="2500">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Validité (heures) <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-clock field-ico"></i>
+              <input formControlName="dureeValiditeHeures" type="number" min="1" placeholder="24">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-toggle">
+          <div class="toggle-info">
+            <i class="fas fa-circle-check"></i>
+            <div>
+              <strong>Tarif actif</strong>
+              <span>Disponible à la vente en caisse</span>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="actif">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="annuler()">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn-save" [disabled]="form.invalid">
+            <i class="fas fa-check"></i>
+            {{ edit.id ? 'Enregistrer' : 'Créer le tarif' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

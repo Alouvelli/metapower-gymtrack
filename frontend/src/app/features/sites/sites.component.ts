@@ -25,6 +25,9 @@ export class SitesComponent implements OnInit {
 
   ngOnInit() { this.charger(); }
 
+  get sitesActifs():   number { return this.sites.filter(s => s.actif).length; }
+  get sitesInactifs(): number { return this.sites.filter(s => !s.actif).length; }
+
   charger() { this.siteSvc.liste().subscribe(s => this.sites = s); }
 
   nouveau() {

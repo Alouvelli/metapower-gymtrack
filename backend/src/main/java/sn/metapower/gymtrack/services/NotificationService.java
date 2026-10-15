@@ -69,9 +69,7 @@ public class NotificationService {
             if (m.getEmail() == null || m.getEmail().isBlank()) continue;
 
             boolean dejaPaye = mensualiteRepository
-                    .findFirstByMembreAndMoisConcerne(m, moisCourant)
-                    .map(mens -> mens.getStatut() == StatutPaiement.PAYE)
-                    .orElse(false);
+                    .existsCouvrant(m, StatutPaiement.PAYE, moisCourant);
 
             if (!dejaPaye) {
                 envoyerRappel(m, finMois);

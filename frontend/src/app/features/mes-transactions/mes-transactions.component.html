@@ -1,0 +1,208 @@
+<div class="mt-wrapper">
+
+  <!-- ══════════ HERO ══════════ -->
+  <div class="mt-hero">
+    <div class="hero-deco"></div>
+
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-icon-wrap"><i class="fas fa-list-check"></i></div>
+        <div class="hero-text">
+          <h1>Mes transactions</h1>
+          <p>Mensualités enregistrées &amp; tickets vendus par votre compte</p>
+        </div>
+      </div>
+
+      <!-- Gérant identity badges -->
+      <div class="hero-badges-row">
+        <div class="hero-id-badge" *ngIf="displayName">
+          <i class="fas fa-user-tie"></i>
+          <span>{{ displayName }}</span>
+        </div>
+        <div class="hero-id-badge accent" *ngIf="siteNom">
+          <i class="fas fa-building"></i>
+          <span>{{ siteNom }}</span>
+        </div>
+        <div class="hero-id-badge" *ngIf="creneau">
+          <i class="fas fa-clock"></i>
+          <span>{{ creneau }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="hero-stats">
+      <div class="h-stat">
+        <span class="h-stat-val">{{ totalMens }}</span>
+        <span class="h-stat-lbl">Mensualités</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ formatFcfa(caMens) }}</span>
+        <span class="h-stat-lbl">CA Mensualités</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ totalTick }}</span>
+        <span class="h-stat-lbl">Tickets</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ formatFcfa(caTick) }}</span>
+        <span class="h-stat-lbl">CA Tickets</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="mt-body">
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn" [class.active]="activeTab === 'mensualites'"
+              (click)="activeTab = 'mensualites'">
+        <i class="fas fa-money-bill-wave"></i>
+        <span>Mensualités enregistrées</span>
+        <span class="tab-count">{{ totalMens }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'tickets'"
+              (click)="activeTab = 'tickets'">
+        <i class="fas fa-ticket"></i>
+        <span>Tickets vendus</span>
+        <span class="tab-count">{{ totalTick }}</span>
+      </button>
+    </div>
+
+    <!-- ══ MENSUALITÉS TABLE ══ -->
+    <div class="table-card" [hidden]="activeTab !== 'mensualites'">
+
+      <div class="loading-row" *ngIf="loadingMens">
+        <mat-spinner diameter="34"></mat-spinner>
+      </div>
+
+      <table mat-table [dataSource]="mensDs" [class.vis-hidden]="loadingMens">
+
+        <ng-container matColumnDef="membre">
+          <th mat-header-cell *matHeaderCellDef>Membre</th>
+          <td mat-cell *matCellDef="let m">
+            <span *ngIf="m.membre">{{ m.membre.nom | uppercase }} {{ m.membre.prenom }}</span>
+            <span *ngIf="!m.membre" class="dash">—</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="mois">
+          <th mat-header-cell *matHeaderCellDef>Mois</th>
+          <td mat-cell *matCellDef="let m">{{ m.moisConcerne | date:'MMM yyyy':undefined:'fr-FR' }}<ng-container *ngIf="(m.nbMois ?? 1) > 1"> → {{ m.moisFin | date:'MMM yyyy':undefined:'fr-FR' }}</ng-container></td>
+        </ng-container>
+
+        <ng-container matColumnDef="montant">
+          <th mat-header-cell *matHeaderCellDef>Montant</th>
+          <td mat-cell *matCellDef="let m">
+            <strong class="amount-val">{{ m.montant | number:'1.0-0' }} FCFA</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date paiement</th>
+          <td mat-cell *matCellDef="let m">{{ m.datePaiement | date:'dd/MM/yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mode">
+          <th mat-header-cell *matHeaderCellDef>Mode</th>
+          <td mat-cell *matCellDef="let m">
+            <span class="mode-tag">{{ m.modePaiement }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="statut">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let m">
+            <span class="status-badge"
+              [class.success]="m.statut === 'PAYE'"
+              [class.warning]="m.statut === 'EN_ATTENTE'"
+              [class.danger]="m.statut === 'EN_RETARD'">
+              {{ m.statut }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="mensCols"></tr>
+        <tr mat-row *matRowDef="let row; columns: mensCols;"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="!loadingMens && !mensDs.data.length">
+        <div class="empty-icon"><i class="fas fa-money-bill-wave"></i></div>
+        <h4>Aucune mensualité</h4>
+        <p>Vous n'avez enregistré aucun paiement de mensualité pour l'instant.</p>
+      </div>
+
+      <mat-paginator #mensPaginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+    </div>
+
+    <!-- ══ TICKETS TABLE ══ -->
+    <div class="table-card" [hidden]="activeTab !== 'tickets'">
+
+      <div class="loading-row" *ngIf="loadingTick">
+        <mat-spinner diameter="34"></mat-spinner>
+      </div>
+
+      <table mat-table [dataSource]="tickDs" [class.vis-hidden]="loadingTick">
+
+        <ng-container matColumnDef="numero">
+          <th mat-header-cell *matHeaderCellDef>Numéro</th>
+          <td mat-cell *matCellDef="let t">
+            <span class="mono-tag">{{ t.numero || '—' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let t">{{ t.datePaiement | date:'dd/MM/yy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="prix">
+          <th mat-header-cell *matHeaderCellDef>Prix</th>
+          <td mat-cell *matCellDef="let t">
+            <strong class="amount-val">{{ t.prix | number:'1.0-0' }} FCFA</strong>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="mode">
+          <th mat-header-cell *matHeaderCellDef>Mode</th>
+          <td mat-cell *matCellDef="let t">
+            <span class="mode-tag">{{ t.modePaiement }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="client">
+          <th mat-header-cell *matHeaderCellDef>Client</th>
+          <td mat-cell *matCellDef="let t">{{ t.nomClient || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="statut">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let t">
+            <span class="status-badge"
+              [class.success]="t.statut === 'VALIDE'"
+              [class.muted]="t.statut === 'UTILISE'"
+              [class.danger]="t.statut === 'EXPIRE' || t.statut === 'ANNULE'">
+              {{ t.statut }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="tickCols"></tr>
+        <tr mat-row *matRowDef="let row; columns: tickCols;"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="!loadingTick && !tickDs.data.length">
+        <div class="empty-icon"><i class="fas fa-ticket"></i></div>
+        <h4>Aucun ticket</h4>
+        <p>Vous n'avez vendu aucun ticket pour l'instant.</p>
+      </div>
+
+      <mat-paginator #tickPaginator [pageSizeOptions]="[10, 25, 50]" pageSize="10" showFirstLastButtons></mat-paginator>
+    </div>
+
+  </div>
+</div>

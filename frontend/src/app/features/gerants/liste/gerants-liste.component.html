@@ -1,0 +1,64 @@
+<div class="gerants-wrapper">
+
+  <div class="gerants-header">
+    <div>
+      <h1>Gérants</h1>
+      <p>{{ gerants.length }} gérant{{ gerants.length > 1 ? 's' : '' }} affecté{{ gerants.length > 1 ? 's' : '' }} aux salles</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="nouveau()">
+      <mat-icon>person_add</mat-icon> Nouveau gérant
+    </button>
+  </div>
+
+  <mat-card>
+    <table mat-table [dataSource]="gerants" class="gerants-table" *ngIf="gerants.length > 0; else vide">
+
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef>Nom</th>
+        <td mat-cell *matCellDef="let g">{{ g.prenom }} {{ g.nom }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="username">
+        <th mat-header-cell *matHeaderCellDef>Identifiant</th>
+        <td mat-cell *matCellDef="let g">{{ g.username }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="site">
+        <th mat-header-cell *matHeaderCellDef>Salle</th>
+        <td mat-cell *matCellDef="let g">{{ g.siteNom }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="creneau">
+        <th mat-header-cell *matHeaderCellDef>Créneau</th>
+        <td mat-cell *matCellDef="let g">{{ gerantSvc.toHHmm(g.heureDebut) }} – {{ gerantSvc.toHHmm(g.heureFin) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="statut">
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let g">
+          <span class="badge" [class.inactif]="g.actif === false">{{ g.actif === false ? 'Inactif' : 'Actif' }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let g" class="actions">
+          <button mat-icon-button matTooltip="Modifier le créneau" (click)="modifierHoraire(g)">
+            <mat-icon>schedule</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Désactiver" [disabled]="g.actif === false" (click)="desactiver(g)">
+            <mat-icon>person_off</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+      <tr mat-row *matRowDef="let row; columns: colonnes"></tr>
+    </table>
+
+    <ng-template #vide>
+      <p class="vide">Aucun gérant pour le moment.</p>
+    </ng-template>
+  </mat-card>
+
+</div>

@@ -2,6 +2,7 @@ package sn.metapower.gymtrack.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import sn.metapower.gymtrack.dto.PointageMembreDto;
 import sn.metapower.gymtrack.dto.ScanRequest;
 import sn.metapower.gymtrack.dto.ScanResponse;
 import sn.metapower.gymtrack.entities.Pointage;
@@ -43,6 +44,17 @@ public class PointageController {
     @GetMapping
     public List<Pointage> findAll() {
         return pointageRepository.findAll();
+    }
+
+    /**
+     * Historique de pointages d'un membre (trié du plus récent au plus ancien).
+     */
+    @GetMapping("/membre/{membreId}")
+    public List<PointageMembreDto> findByMembre(@PathVariable Long membreId) {
+        return pointageRepository.findByMembreIdOrderByHeureEntreeDesc(membreId)
+                .stream()
+                .map(PointageMembreDto::from)
+                .toList();
     }
 
     /**

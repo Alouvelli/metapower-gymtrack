@@ -1,57 +1,242 @@
-<mat-sidenav-container class="layout">
+<mat-sidenav-container class="layout" [class.sidebar-mini]="sidebarMini">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
   <mat-sidenav mode="side" opened class="sidebar">
+
+    <!-- Brand -->
     <div class="brand">
       <div class="brand-logo">
-        <i class="fas fa-dumbbell"></i>
+        <img src="assets/images/logo.png" alt="Meta Power" class="brand-logo-img">
       </div>
       <div class="brand-text">
         <div class="brand-title">METAPOWER</div>
-        <div class="brand-sub">GymTrack</div>
+        <div class="brand-sub">African Fitness Hardcore</div>
       </div>
     </div>
 
+    <!-- Navigation -->
     <nav class="nav-list">
+      <div class="nav-section-label">Menu principal</div>
       <a *ngFor="let item of nav; let i = index"
          class="nav-link"
          [routerLink]="item.route"
          routerLinkActive="active"
-         [style.animation-delay.s]="i * 0.05">
+         [style.animation-delay.s]="i * 0.055"
+         [matTooltip]="sidebarMini ? item.label : ''"
+         matTooltipPosition="right">
         <span class="nav-icon"><i [class]="item.icon"></i></span>
         <span class="nav-label">{{ item.label }}</span>
-        <span class="nav-indicator"></span>
       </a>
     </nav>
 
+    <!-- Footer -->
     <div class="sidebar-footer">
+      <div class="footer-user">
+        <div class="footer-avatar">{{ userInitial }}</div>
+        <div class="footer-info">
+          <div class="footer-name">{{ userDisplayName }}</div>
+          <div class="footer-role">{{ userRoleLabel }}</div>
+        </div>
+        <button class="footer-logout" (click)="logout()" matTooltip="Déconnexion">
+          <i class="fas fa-right-from-bracket"></i>
+        </button>
+      </div>
       <div class="version-tag">v1.0 · Pilote</div>
     </div>
+
   </mat-sidenav>
 
+  <!-- ══════════ MAIN CONTENT ══════════ -->
   <mat-sidenav-content>
+
+    <!-- ── TOPBAR DOCADS GLASSMORPHISM ── -->
     <div class="topbar">
+
+      <!-- LEFT: Toggle + séparateur + titre de page -->
       <div class="topbar-left">
-        <span class="topbar-title">Gestion centralisée multisite</span>
+        <button class="sidebar-toggle"
+                (click)="toggleSidebar()"
+                [title]="sidebarMini ? 'Ouvrir le menu' : 'Réduire le menu'">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-sep"></div>
+        <span class="topbar-title">{{ getPageTitle() }}</span>
       </div>
+
+      <!-- CENTER: Search bar + dropdown -->
+      <div class="topbar-center">
+        <div class="search-cont">
+          <div class="search-wrap" [class.focused]="isSearchFocused">
+            <i class="fas fa-search search-ico"></i>
+            <input #searchInput
+                   type="text"
+                   class="search-inp"
+                   [(ngModel)]="searchQuery"
+                   (focus)="onSearchFocus()"
+                   (blur)="onSearchBlur()"
+                   (input)="onSearchInput()"
+                   (keyup.enter)="performSearch()"
+                   placeholder="Rechercher..."
+                   autocomplete="off">
+            <div class="search-kbd" *ngIf="!searchQuery && !isSearchFocused">
+              <span>Ctrl</span><span>K</span>
+            </div>
+            <button *ngIf="searchQuery" class="search-clear" (click)="clearSearch()" type="button">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <!-- Dropdown résultats -->
+          <div class="search-results" *ngIf="showSearchResults">
+
+            <div class="s-section" *ngIf="!searchQuery">
+              <div class="s-section-title">Actions rapides</div>
+              <div class="quick-actions-grid">
+                <button *ngFor="let a of quickActions"
+                        class="quick-action-btn"
+                        (click)="navigateTo(a.route)">
+                  <i [class]="a.icon"></i>
+                  <span>{{ a.label }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="s-section" *ngIf="searchQuery && searchResults.length > 0">
+              <div class="s-section-title">Résultats</div>
+              <a *ngFor="let r of searchResults"
+                 class="search-result-item"
+                 (click)="navigateTo(r.route)">
+                <i [class]="r.icon"></i>
+                <span>{{ r.title }}</span>
+              </a>
+            </div>
+
+            <div class="no-results" *ngIf="searchQuery && searchResults.length === 0">
+              <i class="fas fa-search"></i>
+              <p>Aucun résultat pour "{{ searchQuery }}"</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Boutons d'action + profil -->
       <div class="topbar-right">
-        <button class="topbar-btn" matTooltip="Notifications">
+
+        <!-- Dark mode -->
+        <button class="nav-btn theme-btn"
+                (click)="toggleTheme()"
+                [title]="isDarkMode ? 'Mode clair' : 'Mode sombre'">
+          <i [class]="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+        </button>
+
+        <!-- Plein écran -->
+        <button class="nav-btn"
+                (click)="toggleFullscreen()"
+                [title]="isFullscreen ? 'Quitter plein écran' : 'Plein écran'">
+          <i [class]="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="nav-btn notif-btn" matTooltip="Notifications">
           <i class="fas fa-bell"></i>
-          <span class="topbar-dot"></span>
+          <span class="notif-dot"></span>
         </button>
-        <button class="user-btn" [matMenuTriggerFor]="menu">
-          <span class="user-avatar">A</span>
-          <span class="user-name">Admin</span>
-          <i class="fas fa-chevron-down"></i>
-        </button>
-        <mat-menu #menu="matMenu" xPosition="before">
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon><span>Déconnexion</span>
+
+        <!-- Profile dropdown -->
+        <div class="profile-drop">
+          <button class="profile-btn" (click)="toggleProfileMenu($event)">
+            <div class="profile-av">
+              <span>{{ userInitial }}</span>
+              <span class="status-dot"></span>
+            </div>
+            <div class="profile-info">
+              <span class="p-name">{{ userDisplayName }}</span>
+              <span class="p-role">{{ userRoleLabel }}</span>
+            </div>
+            <i class="fas fa-chevron-down chev" [class.open]="isProfileMenuOpen"></i>
           </button>
-        </mat-menu>
+
+          <!-- Menu profil -->
+          <div class="profile-menu" [class.show]="isProfileMenuOpen" (click)="$event.stopPropagation()">
+            <div class="pm-head">
+              <div class="pm-av-lg">{{ userInitial }}</div>
+              <div class="pm-name">{{ userDisplayName }}</div>
+              <div class="pm-email" *ngIf="auth.currentUser?.email">{{ auth.currentUser?.email }}</div>
+              <div class="pm-badge">
+                <i class="fas fa-shield-alt"></i> {{ userRoleLabel }}
+              </div>
+            </div>
+            <div class="pm-div"></div>
+            <a class="pm-item" (click)="openThemeModal()">
+              <i class="fas fa-palette"></i><span>Personnalisation</span>
+            </a>
+            <a class="pm-item" href="mailto:support@metapower.gym">
+              <i class="fas fa-question-circle"></i><span>Aide &amp; Support</span>
+            </a>
+            <div class="pm-div"></div>
+            <a class="pm-item pm-logout" (click)="logout()">
+              <i class="fas fa-sign-out-alt"></i><span>Déconnexion</span>
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
+    <!-- ── /TOPBAR ── -->
 
     <div class="content">
       <router-outlet></router-outlet>
     </div>
+
   </mat-sidenav-content>
+
 </mat-sidenav-container>
+
+<!-- ══════════ MODAL APPARENCE ══════════ -->
+<div class="theme-overlay" [class.show]="isThemeModalOpen" (click)="closeThemeModal()">
+  <div class="theme-modal" (click)="$event.stopPropagation()">
+
+    <div class="theme-modal-hdr">
+      <h5><i class="fas fa-palette"></i> Apparence</h5>
+      <button class="close-btn" (click)="closeThemeModal()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="theme-modal-body">
+
+      <!-- Identité de marque — lecture seule -->
+      <div class="theme-section">
+        <div class="theme-section-title">Identité visuelle</div>
+        <div class="brand-identity-card">
+          <div class="bi-logo">
+            <img src="assets/images/logo.png" alt="Meta Power" class="bi-logo-img">
+          </div>
+          <div class="bi-info">
+            <div class="bi-name">METAPOWER GYM</div>
+            <div class="bi-sub">African Fitness Hardcore</div>
+            <div class="bi-palette">
+              <span class="bi-swatch bi-gold" title="Or #D4A017"></span>
+              <span class="bi-swatch bi-black" title="Noir #111111"></span>
+              <span class="bi-swatch bi-white" title="Blanc #FFFFFF"></span>
+              <span class="bi-locked"><i class="fas fa-lock"></i> Identité verrouillée</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode d'affichage -->
+      <div class="theme-section">
+        <div class="theme-section-title">Mode d'affichage</div>
+        <div class="mode-switch">
+          <button class="mode-btn" [class.active]="!isDarkMode" (click)="setDarkMode(false)">
+            <i class="fas fa-sun"></i><span>Clair</span>
+          </button>
+          <button class="mode-btn" [class.active]="isDarkMode" (click)="setDarkMode(true)">
+            <i class="fas fa-moon"></i><span>Sombre</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

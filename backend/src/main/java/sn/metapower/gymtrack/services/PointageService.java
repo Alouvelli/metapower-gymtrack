@@ -54,17 +54,23 @@ public class PointageService {
         Site site = siteRepository.findById(req.siteId())
                 .orElseThrow(() -> new RessourceNotFoundException("Site introuvable : " + req.siteId()));
 
-        // 1. Anti-doublon : même token + même site dans les 5 dernières minutes
+        // 1. Anti-doublon : même token + même site dans les 5 minutes suivant une entrée AUTORISÉE.
+        //    Un refus ne verrouille pas le QR (ex. le membre paie au comptoir puis re-scanne).
         String dedupKey = req.qrToken() + ":" + site.getId();
         Cache cache = cacheManager.getCache(CacheConfig.SCAN_DEDUP_CACHE);
         if (cache != null && cache.get(dedupKey) != null) {
             log.info("Scan ignoré (doublon < 5 min) : token={}, site={}", req.qrToken(), site.getId());
             return ScanResponse.refus("DOUBLON_RECENT");
         }
-        if (cache != null) {
+
+        ScanResponse response = scanSansDedup(req, site);
+        if (response.autorise() && cache != null) {
             cache.put(dedupKey, Boolean.TRUE);
         }
+        return response;
+    }
 
+    private ScanResponse scanSansDedup(ScanRequest req, Site site) {
         // 2. Tenter membre d'abord
         Optional<Membre> membreOpt = membreRepository.findByQrCodeToken(req.qrToken());
         if (membreOpt.isPresent()) {

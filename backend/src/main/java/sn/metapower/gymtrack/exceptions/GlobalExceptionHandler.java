@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -38,6 +40,18 @@ public class GlobalExceptionHandler {
         body.put("error", "Validation Error");
         body.put("fields", fields);
         return ResponseEntity.badRequest().body(body);
+    }
+
+    // Sans ce handler, les refus @PreAuthorize tombent dans handleAll() → 500 au lieu de 403
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        return build(HttpStatus.FORBIDDEN, "Accès refusé");
+    }
+
+    // URL inconnue : 404 au lieu de 500 (évite de gonfler le taux d'erreurs 5xx)
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResource(NoResourceFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, "Ressource introuvable");
     }
 
     @ExceptionHandler(Exception.class)

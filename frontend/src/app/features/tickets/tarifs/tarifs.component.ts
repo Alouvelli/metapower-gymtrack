@@ -25,7 +25,12 @@ export class TarifsComponent implements OnInit {
 
   ngOnInit() { this.charger(); }
 
+  get tarifsActifs():   number { return this.tarifs.filter(t => t.actif !== false).length; }
+  get tarifsInactifs(): number { return this.tarifs.filter(t => t.actif === false).length; }
+
   charger() { this.ticketSvc.listeTarifs().subscribe(t => this.tarifs = t); }
+
+  annuler() { this.edit = null; }
 
   nouveau() {
     this.edit = {} as TarifTicket;

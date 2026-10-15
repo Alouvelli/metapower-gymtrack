@@ -50,6 +50,9 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() { this.ds.paginator = this.paginator; }
 
+  get totalPaye():     number { return this.ds.data.filter(m => m.statut === 'PAYE').length; }
+  get totalEnAttente(): number { return this.ds.data.filter(m => m.statut === 'EN_ATTENTE').length; }
+
   charger() {
     this.mensSvc.liste().subscribe(d => this.ds.data = d);
   }
