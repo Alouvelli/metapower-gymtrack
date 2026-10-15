@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -84,8 +85,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/pointages/scan").hasAuthority("ROLE_DEVICE")
                         // Photos membres et reçus tickets en lecture publique
                         .requestMatchers("/files/view/**", "/files/download/**").permitAll()
-                        // Reçu PDF ticket — ouvert dans un nouvel onglet (pas de JWT possible)
-                        .requestMatchers("/api/tickets/*/recu").permitAll()
+                        // Ticket public (page WhatsApp du client, QR, reçu PDF) — par token UUID,
+                        // jamais par id séquentiel (sinon on récupère les QR valides des autres)
+                        .requestMatchers(HttpMethod.GET, "/api/public/tickets/**").permitAll()
                         // QR code membres — chargé via <img src> (pas de JWT possible)
                         .requestMatchers("/api/membres/*/qrcode").permitAll()
                         // Tout le reste : JWT requis

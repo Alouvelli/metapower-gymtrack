@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public interface TicketEntreeRepository extends JpaRepository<TicketEntree, Long> {
     Optional<TicketEntree> findByQrCodeToken(String qrCodeToken);
+
+    /** Plus grand numéro de ticket commençant par le préfixe du jour (ex. « TKT-20261015- »). */
+    @Query("SELECT MAX(t.numero) FROM TicketEntree t WHERE t.numero LIKE CONCAT(:prefix, '%')")
+    Optional<String> findMaxNumeroByPrefix(@Param("prefix") String prefix);
     long countBySiteAndDatePaiementBetween(Site site, Instant from, Instant to);
     long countByDatePaiementBetween(Instant from, Instant to);
     List<TicketEntree> findBySiteAndDatePaiementBetween(Site site, Instant from, Instant to);

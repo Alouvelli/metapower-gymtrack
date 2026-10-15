@@ -21,5 +21,5 @@ export class TicketService {
   vendre(payload: any): Observable<TicketVenteResponse> {
     return this.http.post<TicketVenteResponse>(this.base, payload);
   }
-  recuUrl(id: number): string { return `${this.base}/${id}/recu`; }
+  recuUrl(qrCodeToken: string): string { return `${environment.apiUrl}/api/public/tickets/${qrCodeToken}/recu`; }
 }

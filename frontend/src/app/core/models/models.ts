@@ -87,6 +87,9 @@ export interface TicketVenteResponse {
   modePaiement: string;
   dateValidite: string;
   nomClient?: string;
+  telephoneClient: string;   // format international sans « + » (ex. 221771234567)
+  lienTicket: string;        // page publique /t/{token} avec le QR
+  lienWhatsApp: string;      // lien wa.me avec message pré-rempli
 }
 
 export interface ScanResponse {

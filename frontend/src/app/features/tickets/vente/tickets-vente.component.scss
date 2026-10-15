@@ -242,3 +242,14 @@ h3 {
     strong { color: var(--text-primary); font-weight: 600; }
   }
 }
+
+// Spécificité renforcée : les styles Material du bouton l'emportent sinon
+.whatsapp.mat-mdc-unelevated-button,
+.whatsapp.mat-flat-button {
+  width: 100%;
+  margin-bottom: 8px;
+  background-color: #25d366;
+  color: #fff;
+  --mdc-filled-button-container-color: #25d366;
+  --mdc-filled-button-label-text-color: #fff;
+}

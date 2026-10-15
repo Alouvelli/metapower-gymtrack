@@ -28,6 +28,13 @@ Stack complète lancée en local (Docker Compose + Mailpit), données de `seed_t
 - [x] Header/sidebar affichaient « Administrateur / Super Admin » en dur pour tout le monde
 - [x] Accès refusé (gérant → API admin) renvoyait 500 au lieu de 403 ; URL inconnue 500 au lieu de 404
 
+**Tickets par WhatsApp (ajouté) :**
+- [x] Numéro WhatsApp obligatoire pour tout ticket (normalisé au format 221XXXXXXXXX) ; bouton « Envoyer le ticket sur WhatsApp » (lien wa.me, message pré-rempli, la caisse appuie sur Envoyer)
+- [x] Page client publique `/t/<token>` avec le QR à présenter à l'entrée ; affiche « déjà utilisé » / « expiré »
+- [x] Faille fermée : `/api/tickets/{id}/recu` était public par id séquentiel (QR valides récupérables) → reçu public uniquement par token
+- [x] Numérotation des tickets : l'ancien suffixe (secondes % 10000) provoquait des doublons → compteur journalier
+- [ ] Prod : tester l'envoi depuis le poste de caisse (WhatsApp Web connecté ou WhatsApp Desktop installé)
+
 **À décider (règles métier, non modifiées) :**
 - [x] **Plans multi-mois** : un paiement couvre désormais toute la durée du plan (`nb_mois` / `mois_fin`, migration **V3**). Paiements existants repris : montant = prix du plan multi-mois actuel → durée du plan, sinon 1 mois. **Vérifier ce résultat sur une copie de la base de prod avant de déployer.** Taux de recouvrement, scan et rappels email utilisent la couverture.
 - [x] **Anti-doublon** : seul un scan **autorisé** verrouille le QR 5 min.
@@ -55,7 +62,7 @@ Stack complète lancée en local (Docker Compose + Mailpit), données de `seed_t
 - [ ] `JWT_SECRET` new random 256-bit value (`openssl rand -hex 32`) — note: changing it logs everyone out
 - [ ] `ADMIN_DEFAULT_PASSWORD` strong; admin password changed after first login. `DataInitializer.java:56` **logs the admin password in clear** — remove that log line or purge logs
 - [ ] `DEVICE_ACCESS_KEY` set and configured on the reception tablets/scanners
-- [ ] `APP_BASE_URL` = real production URL (used for CORS and email links)
+- [ ] `APP_BASE_URL` = real **public HTTPS** production URL (used for CORS, email links and the **ticket link sent by WhatsApp** — `localhost` or a `192.168.x.x` LAN address won't open on the client's phone over 4G)
 - [ ] `MAIL_*` set and a test expiry-reminder email received
 - [ ] `environment.prod.ts` has `apiUrl: ''` (relative, through nginx) ✅ — the dev `environment.ts` points to `192.168.1.245:8090`, make sure prod build uses `--configuration production`
 

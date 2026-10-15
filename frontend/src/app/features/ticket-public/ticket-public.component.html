@@ -1,0 +1,28 @@
+<div class="page">
+  <div class="carte">
+    <img src="assets/images/logo.png" alt="METAPOWER" class="logo">
+
+    <ng-container *ngIf="ticket">
+      <h1>{{ ticket.siteNom }}</h1>
+      <div class="numero">{{ ticket.numero }}</div>
+
+      <div class="qr-wrap" [class.inactif]="!utilisable">
+        <img [src]="qrUrl" alt="QR code du ticket" class="qr">
+      </div>
+
+      <p class="consigne" *ngIf="utilisable">Présentez ce QR code au scanner à l'entrée</p>
+      <p class="alerte" *ngIf="ticket.statut === 'UTILISE'">Ce ticket a déjà été utilisé</p>
+      <p class="alerte" *ngIf="ticket.statut === 'ANNULE'">Ce ticket a été annulé</p>
+      <p class="alerte" *ngIf="ticket.statut !== 'UTILISE' && ticket.statut !== 'ANNULE' && expire">Ce ticket a expiré</p>
+
+      <dl>
+        <div *ngIf="ticket.nomClient"><dt>Client</dt><dd>{{ ticket.nomClient }}</dd></div>
+        <div><dt>Formule</dt><dd>{{ ticket.tarif }}</dd></div>
+        <div><dt>Prix</dt><dd>{{ ticket.prix }} FCFA</dd></div>
+        <div><dt>Valable jusqu'au</dt><dd>{{ ticket.dateValidite | date:'dd/MM/yyyy HH:mm' }}</dd></div>
+      </dl>
+    </ng-container>
+
+    <p class="alerte" *ngIf="introuvable">Ticket introuvable. Vérifiez le lien reçu par WhatsApp.</p>
+  </div>
+</div>

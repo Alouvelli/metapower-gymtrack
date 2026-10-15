@@ -21,6 +21,13 @@ const routes: Routes = [
       import('./features/pointages/scanner/scanner.module').then(m => m.ScannerModule)
   },
 
+  // Ticket client (lien envoyé par WhatsApp, route publique → token QR)
+  {
+    path: 't/:token',
+    loadChildren: () =>
+      import('./features/ticket-public/ticket-public.module').then(m => m.TicketPublicModule)
+  },
+
   // Modules protégés sous le shell layout
   {
     path: '',

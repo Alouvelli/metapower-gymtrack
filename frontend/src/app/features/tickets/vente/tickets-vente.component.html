@@ -47,8 +47,11 @@
           <input matInput formControlName="nomClient">
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Téléphone (optionnel)</mat-label>
-          <input matInput formControlName="telephoneClient">
+          <mat-label>Numéro WhatsApp</mat-label>
+          <input matInput formControlName="telephoneClient" type="tel" inputmode="tel"
+                 placeholder="77 123 45 67" required>
+          <mat-hint>Le ticket est envoyé sur ce numéro</mat-hint>
+          <mat-error>Numéro WhatsApp obligatoire</mat-error>
         </mat-form-field>
       </div>
 
@@ -74,7 +77,11 @@
       <div>Prix : <strong>{{ dernier.prix }} FCFA</strong></div>
       <div>Validité : <strong>{{ dernier.dateValidite | date:'dd/MM/yyyy HH:mm' }}</strong></div>
       <div *ngIf="dernier.nomClient">Client : {{ dernier.nomClient }}</div>
+      <div>WhatsApp : <strong>+{{ dernier.telephoneClient }}</strong></div>
     </div>
+    <a mat-flat-button class="whatsapp" [href]="dernier.lienWhatsApp" target="_blank" rel="noopener">
+      <mat-icon>send</mat-icon> Envoyer le ticket sur WhatsApp
+    </a>
     <button mat-stroked-button color="primary" (click)="imprimerRecu()">
       <mat-icon>print</mat-icon> Imprimer le reçu
     </button>

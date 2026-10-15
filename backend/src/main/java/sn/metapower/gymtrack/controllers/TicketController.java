@@ -12,6 +12,7 @@ import sn.metapower.gymtrack.entities.AppUser;
 import sn.metapower.gymtrack.entities.TicketEntree;
 import sn.metapower.gymtrack.repositories.AppUserRepository;
 import sn.metapower.gymtrack.repositories.TicketEntreeRepository;
+import sn.metapower.gymtrack.services.WhatsAppService;
 import sn.metapower.gymtrack.services.QrCodeService;
 import sn.metapower.gymtrack.services.RecuPdfService;
 import sn.metapower.gymtrack.services.TicketService;
@@ -27,17 +28,20 @@ public class TicketController {
     private final RecuPdfService recuPdfService;
     private final QrCodeService qrCodeService;
     private final AppUserRepository userRepository;
+    private final WhatsAppService whatsAppService;
 
     public TicketController(TicketService ticketService,
                             TicketEntreeRepository ticketRepository,
                             RecuPdfService recuPdfService,
                             QrCodeService qrCodeService,
-                            AppUserRepository userRepository) {
+                            AppUserRepository userRepository,
+                            WhatsAppService whatsAppService) {
         this.ticketService = ticketService;
         this.ticketRepository = ticketRepository;
         this.recuPdfService = recuPdfService;
         this.qrCodeService = qrCodeService;
         this.userRepository = userRepository;
+        this.whatsAppService = whatsAppService;
     }
 
     /**
@@ -64,7 +68,8 @@ public class TicketController {
     public TicketVenteResponse vendre(@Valid @RequestBody TicketVenteRequest request) {
         TicketEntree ticket = ticketService.vendre(request);
         String qrBase64 = qrCodeService.generatePngBase64(ticket.getQrCodeToken());
-        return TicketVenteResponse.from(ticket, qrBase64);
+        return TicketVenteResponse.from(ticket, qrBase64,
+                whatsAppService.lienTicket(ticket), whatsAppService.lienWhatsApp(ticket));
     }
 
     @GetMapping(value = "/{id}/recu", produces = MediaType.APPLICATION_PDF_VALUE)
