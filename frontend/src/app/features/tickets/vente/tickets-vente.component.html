@@ -1,89 +1,109 @@
-<div class="page-header">
-  <div>
-    <h1>Caisse — Vente de tickets</h1>
-    <p class="muted">Génération immédiate du QR + reçu thermique</p>
-  </div>
-  <div class="quick-links">
-    <a mat-stroked-button routerLink="/tickets/liste"><mat-icon>list</mat-icon> Historique</a>
-    <a mat-stroked-button routerLink="/tickets/tarifs"><mat-icon>local_offer</mat-icon> Tarifs</a>
-  </div>
-</div>
+<div class="page-container">
 
-<div class="caisse">
-  <mat-card class="form">
-    <h3>Nouveau ticket</h3>
-    <form [formGroup]="form" (ngSubmit)="vendre()">
-      <mat-form-field appearance="outline" class="full">
-        <mat-label>Salle</mat-label>
-        <mat-select formControlName="siteId">
-          <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <div class="tarifs-grid">
-        <button type="button" *ngFor="let t of tarifs"
-                class="tarif-btn"
-                [class.selected]="form.value.tarifId === t.id"
-                (click)="form.patchValue({ tarifId: t.id })">
-          <div class="lib">{{ t.libelle }}</div>
-          <div class="prix">{{ t.prix }} FCFA</div>
-          <div class="duree">{{ t.dureeValiditeHeures }}h</div>
-        </button>
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <div class="page-header-text">
+        <div class="page-header-icon"><i class="fas fa-cash-register"></i></div>
+        <div>
+          <h1 class="page-header-title">Caisse — Vente de tickets</h1>
+          <p class="page-header-subtitle">Génération immédiate du QR + reçu thermique</p>
+        </div>
       </div>
-
-      <mat-form-field appearance="outline" class="full">
-        <mat-label>Mode de paiement</mat-label>
-        <mat-select formControlName="modePaiement">
-          <mat-option value="ESPECES">Espèces</mat-option>
-          <mat-option value="WAVE">Wave</mat-option>
-          <mat-option value="ORANGE_MONEY">Orange Money</mat-option>
-          <mat-option value="CARTE">Carte bancaire</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <div class="row2">
-        <mat-form-field appearance="outline">
-          <mat-label>Nom du client (optionnel)</mat-label>
-          <input matInput formControlName="nomClient">
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Numéro WhatsApp</mat-label>
-          <input matInput formControlName="telephoneClient" type="tel" inputmode="tel"
-                 placeholder="77 123 45 67" required>
-          <mat-hint>Le ticket est envoyé sur ce numéro</mat-hint>
-          <mat-error>Numéro WhatsApp obligatoire</mat-error>
-        </mat-form-field>
+      <div class="page-header-actions">
+        <a class="header-btn" routerLink="/tickets/liste">
+          <i class="fas fa-list"></i> Historique
+        </a>
+        <a class="header-btn" routerLink="/tickets/tarifs">
+          <i class="fas fa-tags"></i> Tarifs
+        </a>
       </div>
-
-      <div class="total">
-        <span>Total à encaisser</span>
-        <strong>{{ prixSelectionne() }} FCFA</strong>
-      </div>
-
-      <button mat-flat-button color="primary" class="full big" type="submit"
-              [disabled]="loading || form.invalid">
-        <mat-icon>point_of_sale</mat-icon>
-        {{ loading ? 'Vente en cours…' : 'Encaisser & imprimer' }}
-      </button>
-    </form>
-  </mat-card>
-
-  <mat-card class="recu" *ngIf="dernier">
-    <h3>Ticket émis</h3>
-    <div class="numero">{{ dernier.numero }}</div>
-    <img [src]="'data:image/png;base64,' + dernier.qrCodeBase64" class="qr" alt="QR Code ticket">
-    <div class="info">
-      <div>Salle : <strong>{{ dernier.siteNom }}</strong></div>
-      <div>Prix : <strong>{{ dernier.prix }} FCFA</strong></div>
-      <div>Validité : <strong>{{ dernier.dateValidite | date:'dd/MM/yyyy HH:mm' }}</strong></div>
-      <div *ngIf="dernier.nomClient">Client : {{ dernier.nomClient }}</div>
-      <div>WhatsApp : <strong>+{{ dernier.telephoneClient }}</strong></div>
     </div>
-    <a mat-flat-button class="whatsapp" [href]="dernier.lienWhatsApp" target="_blank" rel="noopener">
-      <mat-icon>send</mat-icon> Envoyer le ticket sur WhatsApp
-    </a>
-    <button mat-stroked-button color="primary" (click)="imprimerRecu()">
-      <mat-icon>print</mat-icon> Imprimer le reçu
-    </button>
-  </mat-card>
+  </div>
+
+  <!-- CAISSE LAYOUT -->
+  <div class="caisse">
+
+    <!-- Formulaire -->
+    <mat-card class="form">
+      <h3>Nouveau ticket</h3>
+      <form [formGroup]="form" (ngSubmit)="vendre()">
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Salle</mat-label>
+          <mat-select formControlName="siteId">
+            <mat-option *ngFor="let s of sites" [value]="s.id">{{ s.nom }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="tarifs-grid">
+          <button type="button" *ngFor="let t of tarifs"
+                  class="tarif-btn"
+                  [class.selected]="form.value.tarifId === t.id"
+                  (click)="form.patchValue({ tarifId: t.id })">
+            <div class="lib">{{ t.libelle }}</div>
+            <div class="prix">{{ t.prix }} FCFA</div>
+            <div class="duree">{{ t.dureeValiditeHeures }}h</div>
+          </button>
+        </div>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Mode de paiement</mat-label>
+          <mat-select formControlName="modePaiement">
+            <mat-option value="ESPECES">Espèces</mat-option>
+            <mat-option value="WAVE">Wave</mat-option>
+            <mat-option value="ORANGE_MONEY">Orange Money</mat-option>
+            <mat-option value="CARTE">Carte bancaire</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="row2">
+          <mat-form-field appearance="outline">
+            <mat-label>Nom du client (optionnel)</mat-label>
+            <input matInput formControlName="nomClient">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Numéro WhatsApp</mat-label>
+            <input matInput formControlName="telephoneClient" type="tel" inputmode="tel"
+                   placeholder="77 123 45 67" required>
+            <mat-hint>Le ticket est envoyé sur ce numéro</mat-hint>
+            <mat-error>Numéro WhatsApp obligatoire</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="total">
+          <span>Total à encaisser</span>
+          <strong>{{ prixSelectionne() }} FCFA</strong>
+        </div>
+
+        <button mat-flat-button color="primary" class="full big" type="submit"
+                [disabled]="loading || form.invalid">
+          <mat-icon>point_of_sale</mat-icon>
+          {{ loading ? 'Vente en cours…' : 'Encaisser & imprimer' }}
+        </button>
+      </form>
+    </mat-card>
+
+    <!-- Reçu -->
+    <mat-card class="recu" *ngIf="dernier">
+      <h3>Ticket émis</h3>
+      <div class="numero">{{ dernier.numero }}</div>
+      <img [src]="'data:image/png;base64,' + dernier.qrCodeBase64" class="qr" alt="QR Code ticket">
+      <div class="info">
+        <div>Salle : <strong>{{ dernier.siteNom }}</strong></div>
+        <div>Prix : <strong>{{ dernier.prix }} FCFA</strong></div>
+        <div>Validité : <strong>{{ dernier.dateValidite | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+        <div *ngIf="dernier.nomClient">Client : {{ dernier.nomClient }}</div>
+        <div>WhatsApp : <strong>+{{ dernier.telephoneClient }}</strong></div>
+      </div>
+      <a mat-flat-button class="whatsapp" [href]="dernier.lienWhatsApp" target="_blank" rel="noopener">
+        <mat-icon>send</mat-icon> Envoyer le ticket sur WhatsApp
+      </a>
+      <button mat-stroked-button color="primary" (click)="imprimerRecu()">
+        <mat-icon>print</mat-icon> Imprimer le reçu
+      </button>
+    </mat-card>
+
+  </div>
+
 </div>

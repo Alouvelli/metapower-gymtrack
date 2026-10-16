@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GerantService } from '../../../core/services/gerant.service';
-import { Gerant } from '../../../core/models/models';
+import { SiteService } from '../../../core/services/site.service';
+import { Gerant, Site } from '../../../core/models/models';
 import { GerantFormComponent } from '../form/gerant-form.component';
 
 @Component({
@@ -11,34 +12,62 @@ import { GerantFormComponent } from '../form/gerant-form.component';
   styleUrls: ['./gerants-liste.component.scss']
 })
 export class GerantsListeComponent implements OnInit {
-  gerants: Gerant[] = [];
-  colonnes = ['nom', 'username', 'site', 'creneau', 'statut', 'actions'];
 
-  constructor(public gerantSvc: GerantService, private dialog: MatDialog, private snack: MatSnackBar) {}
+  @ViewChild(GerantFormComponent) formComp!: GerantFormComponent;
 
-  ngOnInit() { this.charger(); }
+  sites: Site[] = [];
+  selectedSiteId: number | null = null;
 
-  charger() { this.gerantSvc.liste().subscribe(g => this.gerants = g); }
+  ds = new MatTableDataSource<Gerant>([]);
+  displayed = ['nom', 'username', 'site', 'creneau', 'actif', 'actions'];
 
-  nouveau() { this.ouvrir(); }
+  showForm = false;
+  loading  = false;
 
-  modifierHoraire(g: Gerant) { this.ouvrir(g); }
+  constructor(
+    private gerantSvc: GerantService,
+    private siteSvc:   SiteService,
+    private snack:     MatSnackBar
+  ) {}
 
-  private ouvrir(gerant?: Gerant) {
-    this.dialog.open(GerantFormComponent, { width: '520px', data: { gerant } })
-      .afterClosed()
-      .subscribe(ok => {
-        if (!ok) return;
-        this.snack.open('Gérant enregistré', 'OK', { duration: 2000 });
-        this.charger();
-      });
+  ngOnInit(): void {
+    this.siteSvc.liste().subscribe(s => this.sites = s);
+    this.charger();
   }
 
-  desactiver(g: Gerant) {
-    if (!g.id || !confirm(`Désactiver le gérant ${g.prenom} ${g.nom} ?`)) return;
-    this.gerantSvc.desactiver(g.id).subscribe(() => {
-      this.snack.open('Gérant désactivé', 'OK', { duration: 2000 });
+  charger(): void {
+    this.loading = true;
+    const obs$ = this.selectedSiteId
+      ? this.gerantSvc.listeBySite(this.selectedSiteId)
+      : this.gerantSvc.liste();
+    obs$.subscribe({
+      next: g => { this.ds.data = g; this.loading = false; },
+      error: () => this.loading = false
+    });
+  }
+
+  ouvrirFormulaire(): void { this.showForm = true; }
+
+  onFormSaved(): void {
+    this.showForm = false;
+    this.charger();
+    this.snack.open('Gérant créé avec succès', 'OK', { duration: 3000, panelClass: 'snack-success' });
+  }
+
+  onFormCancelled(): void { this.showForm = false; }
+
+  desactiver(g: Gerant): void {
+    if (!confirm(`Désactiver le compte de ${g.prenom} ${g.nom} ?`)) return;
+    this.gerantSvc.desactiver(g.id!).subscribe(() => {
+      this.snack.open('Gérant désactivé', 'OK', { duration: 3000 });
       this.charger();
     });
   }
+
+  /** Formattage du créneau HH:mm:ss → HH:mm */
+  creneau(g: Gerant): string {
+    return `${this.gerantSvc.toHHmm(g.heureDebut)} – ${this.gerantSvc.toHHmm(g.heureFin)}`;
+  }
+
+  get totalActifs(): number { return this.ds.data.filter(g => g.actif).length; }
 }

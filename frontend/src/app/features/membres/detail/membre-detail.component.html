@@ -1,58 +1,342 @@
-<div class="page-header">
-  <a mat-icon-button routerLink="/membres"><mat-icon>arrow_back</mat-icon></a>
-  <div class="grow">
-    <h1 *ngIf="membre">{{ membre.nom }} {{ membre.prenom }}</h1>
-    <p class="muted" *ngIf="membre">{{ membre.numeroCarte }}</p>
+<div class="detail-wrapper" *ngIf="membre; else loadTpl">
+
+  <!-- ══════════ HERO ══════════ -->
+  <div class="detail-hero">
+    <div class="hero-deco"></div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-avatar">{{ membre.nom?.charAt(0) }}</div>
+        <div class="hero-text">
+          <h1>{{ membre.nom | uppercase }} {{ membre.prenom }}</h1>
+          <p>
+            <span class="card-chip">
+              <i class="fas fa-id-card"></i> {{ membre.numeroCarte }}
+            </span>
+          </p>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <span class="statut-hero-pill"
+          [class.active]="membre.statut === 'ACTIF'"
+          [class.warning]="membre.statut === 'EN_RETARD'"
+          [class.danger]="membre.statut === 'SUSPENDU' || membre.statut === 'EXPIRE'">
+          <span class="pill-dot"></span>
+          {{ membre.statut }}
+        </span>
+        <a class="btn-hero" routerLink="/membres">
+          <i class="fas fa-arrow-left"></i>
+          <span>Retour</span>
+        </a>
+        <a class="btn-hero btn-edit" [routerLink]="['/membres', membre.id, 'modifier']">
+          <i class="fas fa-pen"></i>
+          <span>Modifier</span>
+        </a>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="h-stat">
+        <span class="h-stat-val">{{ mensualites.length }}</span>
+        <span class="h-stat-lbl">Mensualités</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ pointages.length }}</span>
+        <span class="h-stat-lbl">Pointages</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val plan-stat">{{ membre.planNom || membre.plan?.nom || '—' }}</span>
+        <span class="h-stat-lbl">Plan</span>
+      </div>
+    </div>
   </div>
-  <button mat-stroked-button (click)="imprimerCarte()">
-    <mat-icon>print</mat-icon> Imprimer la carte
-  </button>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="detail-body">
+
+    <!-- CUSTOM TABS -->
+    <div class="tab-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'infos'" (click)="activeTab = 'infos'">
+        <i class="fas fa-address-book"></i> Informations
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'carte'" (click)="activeTab = 'carte'">
+        <i class="fas fa-id-card"></i> Carte membre
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'mensualites'" (click)="activeTab = 'mensualites'">
+        <i class="fas fa-money-bill-wave"></i> Mensualités
+        <span class="tab-count" *ngIf="mensualites.length">{{ mensualites.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'pointages'" (click)="activeTab = 'pointages'">
+        <i class="fas fa-clock-rotate-left"></i> Pointages
+        <span class="tab-count" *ngIf="pointages.length">{{ pointages.length }}</span>
+      </button>
+    </div>
+
+    <!-- ── TAB: Informations ── -->
+    <div class="tab-panel" *ngIf="activeTab === 'infos'">
+      <div class="info-layout">
+
+        <div class="info-card app-card">
+          <div class="app-card-header">
+            <h3><i class="fas fa-address-book"></i> Coordonnées</h3>
+          </div>
+          <div class="app-card-body">
+            <div class="info-grid">
+              <div class="info-row">
+                <span class="info-label"><i class="fas fa-phone"></i> Téléphone</span>
+                <span class="info-value">{{ membre.telephone }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
+                <span class="info-value">{{ membre.email || '—' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="fas fa-cake-candles"></i> Date de naissance</span>
+                <span class="info-value">{{ membre.dateNaissance || '—' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="fas fa-medal"></i> Plan</span>
+                <span class="info-value plan-val">{{ membre.planNom || membre.plan?.nom || '—' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="fas fa-circle-dot"></i> Statut</span>
+                <span class="status-badge"
+                  [class.success]="membre.statut === 'ACTIF'"
+                  [class.warning]="membre.statut === 'EN_RETARD'"
+                  [class.danger]="membre.statut === 'SUSPENDU'"
+                  [class.muted]="membre.statut === 'EXPIRE'">
+                  {{ membre.statut }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Card -->
+        <div class="app-card qr-card">
+          <div class="app-card-header">
+            <h3><i class="fas fa-qrcode"></i> Code QR</h3>
+          </div>
+          <div class="app-card-body qr-body">
+            <img *ngIf="qrUrl" [src]="qrUrl" alt="QR membre" class="qr-img">
+            <p class="qr-help"><i class="fas fa-info-circle"></i> Présentez cette carte au tourniquet pour pointer.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TAB: Carte membre ── -->
+    <div class="tab-panel carte-tab" *ngIf="activeTab === 'carte'">
+
+      <p class="carte-hint">
+        <i class="fas fa-info-circle"></i>
+        Aperçu de la carte physique. Cliquez sur <strong>Imprimer</strong> pour l'envoyer à l'imprimante ou l'exporter en PDF.
+      </p>
+
+      <div class="carte-preview-wrap">
+        <div class="cp-card" id="cp-card">
+
+          <!-- ── Fond décoratif ── -->
+          <div class="cp-bg" aria-hidden="true">
+            <img src="assets/images/logo.png" class="cp-bg-logo" alt="">
+            <div class="cp-bg-pattern"></div>
+          </div>
+
+          <!-- ── Bande supérieure ── -->
+          <div class="cp-stripe"></div>
+
+          <!-- ── Header ── -->
+          <div class="cp-header">
+            <div class="cp-brand">
+              <img src="assets/images/logo.png" alt="MP" class="cp-logo-img">
+              <div class="cp-brand-text">
+                <span class="cp-brand-name">METAPOWER GYM</span>
+                <span class="cp-brand-sub">African Fitness Hardcore</span>
+              </div>
+            </div>
+            <div class="cp-type-badge">MEMBRE</div>
+          </div>
+
+          <!-- ── Corps ── -->
+          <div class="cp-body">
+            <div class="cp-info">
+              <div class="cp-name-block">
+                <div class="cp-nom">{{ membre.nom | uppercase }}</div>
+                <div class="cp-prenom">{{ membre.prenom }}</div>
+              </div>
+              <div class="cp-divider"></div>
+              <div class="cp-details-block">
+                <div class="cp-num">
+                  <i class="fas fa-id-card"></i>
+                  <span>{{ membre.numeroCarte }}</span>
+                </div>
+                <div class="cp-plan" *ngIf="membre.planNom || membre.plan?.nom">
+                  <i class="fas fa-star"></i>
+                  <span>{{ membre.planNom || membre.plan?.nom }}</span>
+                </div>
+                <div class="cp-tel">
+                  <i class="fas fa-phone"></i>
+                  <span>{{ membre.telephone }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="cp-qr-section">
+              <div class="cp-qr-wrap">
+                <img *ngIf="qrUrl" [src]="qrUrl" alt="QR" class="cp-qr">
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Pied ── -->
+          <div class="cp-footer">
+            <span class="cp-footer-brand">METAPOWER GYM</span>
+            <span class="cp-dots">● ● ●</span>
+            <span>Réseau multisite</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="carte-actions">
+        <button class="btn-print" (click)="imprimerCarte()">
+          <i class="fas fa-print"></i> Imprimer la carte
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ── TAB: Mensualités ── -->
+    <div class="tab-panel" *ngIf="activeTab === 'mensualites'">
+      <div class="app-table-card">
+        <div class="table-toolbar">
+          <div class="table-title">
+            <i class="fas fa-money-bill-wave"></i> Historique des paiements
+          </div>
+          <div class="pointage-count" *ngIf="mensualites.length">
+            <span class="count-badge">{{ mensualites.length }}</span> paiements enregistrés
+          </div>
+        </div>
+        <table mat-table [dataSource]="mensualites">
+          <ng-container matColumnDef="mois">
+            <th mat-header-cell *matHeaderCellDef>Mois</th>
+            <td mat-cell *matCellDef="let m">{{ m.moisConcerne }}<ng-container *ngIf="(m.nbMois ?? 1) > 1"> → {{ m.moisFin }}</ng-container></td>
+          </ng-container>
+          <ng-container matColumnDef="montant">
+            <th mat-header-cell *matHeaderCellDef>Montant</th>
+            <td mat-cell *matCellDef="let m"><strong>{{ m.montant | number }} FCFA</strong></td>
+          </ng-container>
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date paiement</th>
+            <td mat-cell *matCellDef="let m">{{ m.datePaiement || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="mode">
+            <th mat-header-cell *matHeaderCellDef>Mode</th>
+            <td mat-cell *matCellDef="let m">
+              <span class="mode-tag">{{ m.modePaiement || '—' }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let m">
+              <span class="status-badge"
+                [class.success]="m.statut === 'PAYE'"
+                [class.warning]="m.statut === 'EN_ATTENTE'"
+                [class.danger]="m.statut === 'RETARD'">
+                {{ m.statut }}
+              </span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['mois','montant','date','mode','statut']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['mois','montant','date','mode','statut'];"></tr>
+        </table>
+        <div class="empty-state" *ngIf="!mensualites.length">
+          <i class="fas fa-money-bill-wave"></i>
+          <h4>Aucune mensualité</h4>
+          <p>Aucun paiement enregistré pour ce membre.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: Pointages ── -->
+    <div class="tab-panel" *ngIf="activeTab === 'pointages'">
+      <div class="app-table-card">
+        <div class="table-toolbar">
+          <div class="table-title">
+            <i class="fas fa-clock-rotate-left"></i> Historique des pointages
+          </div>
+          <div class="pointage-count" *ngIf="pointages.length">
+            <span class="count-badge">{{ pointages.length }}</span> accès enregistrés
+          </div>
+        </div>
+
+        <table mat-table [dataSource]="pointages">
+
+          <ng-container matColumnDef="heureEntree">
+            <th mat-header-cell *matHeaderCellDef>Date &amp; heure</th>
+            <td mat-cell *matCellDef="let p">
+              <div class="pointage-date">
+                <span class="pd-day">{{ p.heureEntree | date:'dd/MM/yyyy' }}</span>
+                <span class="pd-time">{{ p.heureEntree | date:'HH:mm' }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="siteNom">
+            <th mat-header-cell *matHeaderCellDef>Site</th>
+            <td mat-cell *matCellDef="let p">{{ p.siteNom || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="status-badge"
+                [class.success]="p.statut === 'AUTORISE'"
+                [class.danger]="p.statut === 'REFUSE'">
+                <i class="fas" [class.fa-circle-check]="p.statut === 'AUTORISE'" [class.fa-circle-xmark]="p.statut === 'REFUSE'"></i>
+                {{ p.statut === 'AUTORISE' ? 'Autorisé' : 'Refusé' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="motifRefus">
+            <th mat-header-cell *matHeaderCellDef>Motif refus</th>
+            <td mat-cell *matCellDef="let p">
+              <span *ngIf="p.motifRefus" class="motif-tag">{{ p.motifRefus }}</span>
+              <span *ngIf="!p.motifRefus" class="text-muted">—</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="typeAcces">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="type-chip">
+                <i class="fas" [class.fa-id-card]="p.typeAcces === 'MEMBRE'" [class.fa-ticket]="p.typeAcces === 'TICKET'"></i>
+                {{ p.typeAcces || '—' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="scanSource">
+            <th mat-header-cell *matHeaderCellDef>Source</th>
+            <td mat-cell *matCellDef="let p">{{ p.scanSource || '—' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['heureEntree','siteNom','statut','motifRefus','typeAcces','scanSource']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['heureEntree','siteNom','statut','motifRefus','typeAcces','scanSource'];"></tr>
+        </table>
+
+        <div class="empty-state" *ngIf="!pointages.length">
+          <i class="fas fa-clock-rotate-left"></i>
+          <h4>Aucun pointage</h4>
+          <p>Ce membre n'a pas encore été scanné.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<mat-tab-group *ngIf="membre">
-  <mat-tab label="Informations">
-    <div class="info-grid">
-      <mat-card>
-        <h3>Coordonnées</h3>
-        <p><strong>Téléphone :</strong> {{ membre.telephone }}</p>
-        <p><strong>Email :</strong> {{ membre.email || '—' }}</p>
-        <p><strong>Date de naissance :</strong> {{ membre.dateNaissance || '—' }}</p>
-        <p><strong>Plan :</strong> {{ membre.planNom || '—' }}</p>
-        <p><strong>Statut :</strong> {{ membre.statut }}</p>
-      </mat-card>
-      <mat-card class="qr-card">
-        <h3>Carte QR</h3>
-        <img *ngIf="qrUrl" [src]="qrUrl" alt="QR membre" class="qr-img">
-        <p class="qr-help">Scanner cette carte au tourniquet pour pointer.</p>
-      </mat-card>
-    </div>
-  </mat-tab>
-
-  <mat-tab label="Mensualités">
-    <table mat-table [dataSource]="mensualites" class="full mt">
-      <ng-container matColumnDef="mois">
-        <th mat-header-cell *matHeaderCellDef>Mois</th>
-        <td mat-cell *matCellDef="let m">{{ m.moisConcerne }}<ng-container *ngIf="(m.nbMois ?? 1) > 1"> → {{ m.moisFin }}</ng-container></td>
-      </ng-container>
-      <ng-container matColumnDef="montant">
-        <th mat-header-cell *matHeaderCellDef>Montant</th>
-        <td mat-cell *matCellDef="let m">{{ m.montant }} FCFA</td>
-      </ng-container>
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef>Date paiement</th>
-        <td mat-cell *matCellDef="let m">{{ m.datePaiement || '—' }}</td>
-      </ng-container>
-      <ng-container matColumnDef="mode">
-        <th mat-header-cell *matHeaderCellDef>Mode</th>
-        <td mat-cell *matCellDef="let m">{{ m.modePaiement || '—' }}</td>
-      </ng-container>
-      <ng-container matColumnDef="statut">
-        <th mat-header-cell *matHeaderCellDef>Statut</th>
-        <td mat-cell *matCellDef="let m">{{ m.statut }}</td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="['mois','montant','date','mode','statut']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['mois','montant','date','mode','statut'];"></tr>
-    </table>
-    <p class="empty" *ngIf="!mensualites.length">Aucune mensualité enregistrée.</p>
-  </mat-tab>
-</mat-tab-group>
+<ng-template #loadTpl>
+  <div class="load-center"><mat-spinner diameter="48"></mat-spinner></div>
+</ng-template>

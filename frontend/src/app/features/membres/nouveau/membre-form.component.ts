@@ -41,7 +41,7 @@ export class MembreFormComponent implements OnInit {
         this.form.patchValue({
           nom: m.nom, prenom: m.prenom, telephone: m.telephone,
           email: m.email || '', dateNaissance: m.dateNaissance || '',
-          planId: m.planId ?? null
+          planId: m.planId ?? m.plan?.id ?? null
         });
       });
     }

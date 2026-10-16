@@ -30,6 +30,9 @@ export class HistoriqueComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() { this.sub?.unsubscribe(); }
 
+  get pointagesAutorises(): number { return this.pointages.filter(p => p.statut === 'AUTORISE').length; }
+  get pointagesRefuses():   number { return this.pointages.filter(p => p.statut !== 'AUTORISE').length; }
+
   changerSite() { this.charger(); }
 
   charger() {

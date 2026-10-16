@@ -39,7 +39,12 @@
   <!-- Scanner actif -->
   <div class="scan-zone" *ngIf="!configMode">
     <zxing-scanner
+      *ngIf="cameraReady"
+      #zxing
       [formats]="formats"
+      [device]="selectedCamera"
+      [autofocusEnabled]="true"
+      (camerasFound)="onCamerasFound($event)"
       (scanSuccess)="onScan($event)">
     </zxing-scanner>
 
@@ -50,18 +55,50 @@
 
     <!-- Résultat -->
     <div class="result" *ngIf="result" [class.ok]="result.autorise" [class.ko]="!result.autorise">
+
       <mat-icon>{{ result.autorise ? 'check_circle' : 'cancel' }}</mat-icon>
       <h2>{{ result.autorise ? 'Accès autorisé' : 'Accès refusé' }}</h2>
 
-      <div class="info" *ngIf="result.autorise && result.type === 'MEMBRE'">
+      <!-- MEMBRE autorisé -->
+      <div class="result-info" *ngIf="result.autorise && result.type === 'MEMBRE'">
         <strong>{{ result.nom }} {{ result.prenom }}</strong>
-        <span>{{ result.numero }}<ng-container *ngIf="result.planNom"> · {{ result.planNom }}</ng-container></span>
+        <span>{{ result.numero }}</span>
+        <div class="result-badges">
+          <span class="result-badge" *ngIf="result.planNom">
+            <i class="fas fa-id-badge"></i> {{ result.planNom }}
+          </span>
+          <span class="result-badge" *ngIf="result.siteNom">
+            <i class="fas fa-building"></i> {{ result.siteNom }}
+          </span>
+        </div>
+        <div class="result-heure" *ngIf="result.heureEntree">
+          {{ result.heureEntree | date:'HH:mm:ss' }}
+        </div>
       </div>
-      <div class="info" *ngIf="result.autorise && result.type === 'TICKET'">
-        <strong>Ticket {{ result.numero }}</strong>
-        <span *ngIf="result.dateValidite">Valable le {{ result.dateValidite | date:'dd/MM/yyyy' }}</span>
+
+      <!-- TICKET autorisé -->
+      <div class="result-info" *ngIf="result.autorise && result.type === 'TICKET'">
+        <strong>{{ result.nom || 'Client anonyme' }}</strong>
+        <span>Ticket n° {{ result.numero }}</span>
+        <div class="result-badges">
+          <span class="result-badge" *ngIf="result.dateValidite">
+            <i class="fas fa-clock"></i> Valide jusqu'au {{ result.dateValidite | date:'dd/MM à HH:mm' }}
+          </span>
+          <span class="result-badge" *ngIf="result.siteNom">
+            <i class="fas fa-building"></i> {{ result.siteNom }}
+          </span>
+        </div>
+        <div class="result-heure" *ngIf="result.heureEntree">
+          {{ result.heureEntree | date:'HH:mm:ss' }}
+        </div>
       </div>
-      <div class="motif" *ngIf="!result.autorise">{{ result.motifRefus }}</div>
+
+      <!-- Refusé -->
+      <div class="result-motif" *ngIf="!result.autorise">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ motifLabel(result.motifRefus) }}
+      </div>
+
     </div>
   </div>
 
