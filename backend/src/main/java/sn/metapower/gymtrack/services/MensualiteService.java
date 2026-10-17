@@ -15,10 +15,13 @@ import sn.metapower.gymtrack.repositories.MembreRepository;
 import sn.metapower.gymtrack.repositories.MensualiteRepository;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class MensualiteService {
+
+    private static final DateTimeFormatter DATE_FR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final MensualiteRepository mensualiteRepository;
     private final MembreRepository membreRepository;
@@ -37,35 +40,42 @@ public class MensualiteService {
         Membre membre = membreRepository.findById(req.membreId())
                 .orElseThrow(() -> new RessourceNotFoundException("Membre introuvable : " + req.membreId()));
 
-        LocalDate mois = req.moisConcerne().withDayOfMonth(1);
+        LocalDate datePaiement = req.datePaiement() != null ? req.datePaiement() : LocalDate.now();
 
         // Un plan Trimestriel / Semestriel / Annuel couvre plusieurs mois d'un coup
         int nbMois = (membre.getPlan() != null && membre.getPlan().getDureeEnMois() != null)
                 ? Math.max(1, membre.getPlan().getDureeEnMois())
                 : 1;
-        LocalDate moisFin = mois.plusMonths(nbMois - 1);
 
-        if (!mensualiteRepository.findChevauchant(membre, StatutPaiement.PAYE, mois, moisFin).isEmpty()) {
-            throw new BusinessException(nbMois == 1
-                    ? "Mensualité déjà payée pour ce mois"
-                    : "Une partie de la période " + mois + " → " + moisFin + " est déjà payée");
+        // Période « de date à date » : démarre au paiement, ou au lendemain de la fin de
+        // l'abonnement en cours (renouvellement anticipé : aucun jour perdu).
+        LocalDate debut;
+        if (req.dateDebut() != null) {
+            debut = req.dateDebut();
+        } else {
+            LocalDate lendemainFin = mensualiteRepository.findDerniereFin(membre, StatutPaiement.PAYE)
+                    .map(fin -> fin.plusDays(1))
+                    .orElse(datePaiement);
+            debut = lendemainFin.isAfter(datePaiement) ? lendemainFin : datePaiement;
+        }
+        LocalDate fin = debut.plusMonths(nbMois).minusDays(1);   // payé le 29/09 → 28/10
+
+        if (!mensualiteRepository.findChevauchant(membre, StatutPaiement.PAYE, debut, fin).isEmpty()) {
+            throw new BusinessException("La période du " + DATE_FR.format(debut) + " au "
+                    + DATE_FR.format(fin) + " est déjà (en partie) payée");
         }
 
-        Mensualite mensualite = mensualiteRepository
-                .findFirstByMembreAndMoisConcerne(membre, mois)
-                .orElseGet(() -> {
-                    Mensualite m = new Mensualite();
-                    m.setMembre(membre);
-                    m.setMoisConcerne(mois);
-                    return m;
-                });
-
+        Mensualite mensualite = new Mensualite();
+        mensualite.setMembre(membre);
+        mensualite.setDateDebut(debut);
+        mensualite.setDateFin(fin);
+        mensualite.setMoisConcerne(debut.withDayOfMonth(1));
+        mensualite.setMoisFin(fin.withDayOfMonth(1));
         mensualite.setNbMois(nbMois);
-        mensualite.setMoisFin(moisFin);
         mensualite.setMontant(req.montant());
         mensualite.setModePaiement(req.modePaiement());
         mensualite.setReference(req.reference());
-        mensualite.setDatePaiement(req.datePaiement() != null ? req.datePaiement() : LocalDate.now());
+        mensualite.setDatePaiement(datePaiement);
         mensualite.setStatut(StatutPaiement.PAYE);
 
         // Enregistre qui a saisi ce paiement (même pattern que TicketService.vendre)
@@ -87,11 +97,9 @@ public class MensualiteService {
     }
 
     /**
-     * Vérifie si un membre est à jour de sa mensualité pour le mois en cours.
-     * Utilisé par PointageService.
+     * Vrai si un paiement du membre couvre aujourd'hui. Utilisé par PointageService.
      */
     public boolean estAJour(Membre membre) {
-        LocalDate moisCourant = LocalDate.now().withDayOfMonth(1);
-        return mensualiteRepository.existsCouvrant(membre, StatutPaiement.PAYE, moisCourant);
+        return mensualiteRepository.existsCouvrant(membre, StatutPaiement.PAYE, LocalDate.now());
     }
 }

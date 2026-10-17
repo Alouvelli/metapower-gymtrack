@@ -91,8 +91,8 @@
         </ng-container>
 
         <ng-container matColumnDef="mois">
-          <th mat-header-cell *matHeaderCellDef>Mois</th>
-          <td mat-cell *matCellDef="let m">{{ m.moisConcerne | date:'MMM yyyy':undefined:'fr-FR' }}<ng-container *ngIf="(m.nbMois ?? 1) > 1"> → {{ m.moisFin | date:'MMM yyyy':undefined:'fr-FR' }}</ng-container></td>
+          <th mat-header-cell *matHeaderCellDef>Période</th>
+          <td mat-cell *matCellDef="let m">{{ m.dateDebut | date:'dd/MM/yyyy' }} → {{ m.dateFin | date:'dd/MM/yyyy' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="montant">

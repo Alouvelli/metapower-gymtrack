@@ -63,7 +63,7 @@ public class RapportService {
             Sheet sheet = wb.createSheet("Mensualités " + from);
             CellStyle headerStyle = headerStyle(wb);
 
-            String[] headers = {"N° Carte", "Nom", "Prénom", "Téléphone", "Mois",
+            String[] headers = {"N° Carte", "Nom", "Prénom", "Téléphone", "Période",
                     "Montant", "Date paiement", "Mode", "Référence"};
             Row hr = sheet.createRow(0);
             for (int i = 0; i < headers.length; i++) {
@@ -80,7 +80,7 @@ public class RapportService {
                 r.createCell(1).setCellValue(m.getMembre().getNom());
                 r.createCell(2).setCellValue(m.getMembre().getPrenom());
                 r.createCell(3).setCellValue(m.getMembre().getTelephone());
-                r.createCell(4).setCellValue(DATE_FMT.format(m.getMoisConcerne()));
+                r.createCell(4).setCellValue(periode(m));
                 r.createCell(5).setCellValue(m.getMontant());
                 r.createCell(6).setCellValue(m.getDatePaiement() != null ? DATE_FMT.format(m.getDatePaiement()) : "");
                 r.createCell(7).setCellValue(m.getModePaiement() != null ? m.getModePaiement().name() : "");
@@ -186,7 +186,7 @@ public class RapportService {
 
             PdfPTable table = new PdfPTable(new float[]{2, 2, 2, 2, 2, 2, 2});
             table.setWidthPercentage(100);
-            String[] headers = {"N° Carte", "Membre", "Téléphone", "Mois", "Montant", "Mode", "Date"};
+            String[] headers = {"N° Carte", "Membre", "Téléphone", "Période", "Montant", "Mode", "Date"};
             for (String h : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(h, new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE)));
                 cell.setBackgroundColor(new Color(31, 56, 100));
@@ -198,7 +198,7 @@ public class RapportService {
                 table.addCell(m.getMembre().getNumeroCarte());
                 table.addCell(m.getMembre().getNom() + " " + m.getMembre().getPrenom());
                 table.addCell(m.getMembre().getTelephone());
-                table.addCell(DATE_FMT.format(m.getMoisConcerne()));
+                table.addCell(periode(m));
                 table.addCell(String.format("%,d FCFA", m.getMontant()).replace(',', ' '));
                 table.addCell(m.getModePaiement() != null ? m.getModePaiement().name() : "—");
                 table.addCell(m.getDatePaiement() != null ? DATE_FMT.format(m.getDatePaiement()) : "—");
@@ -229,5 +229,10 @@ public class RapportService {
         style.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         return style;
+    }
+
+    /** « 29/09/2026 → 28/10/2026 » : période couverte par le paiement. */
+    private static String periode(Mensualite m) {
+        return DATE_FMT.format(m.getDateDebut()) + " → " + DATE_FMT.format(m.getDateFin());
     }
 }

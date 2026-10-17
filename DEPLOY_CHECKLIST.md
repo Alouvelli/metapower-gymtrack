@@ -38,6 +38,7 @@ Stack complète lancée en local (Docker Compose + Mailpit), données de `seed_t
 **À décider (règles métier, non modifiées) :**
 - [x] **Plans multi-mois** : un paiement couvre désormais toute la durée du plan (`nb_mois` / `mois_fin`, migration **V3**). Paiements existants repris : montant = prix du plan multi-mois actuel → durée du plan, sinon 1 mois. **Vérifier ce résultat sur une copie de la base de prod avant de déployer.** Taux de recouvrement, scan et rappels email utilisent la couverture.
 - [x] **Anti-doublon** : seul un scan **autorisé** verrouille le QR 5 min.
+- [x] **Période « de date à date »** (migration **V4**) : payé le 29/09 → valable jusqu'au 28/10 ; renouvellement anticipé = démarre au lendemain de la fin ; rappel email 3 jours avant la fin propre à chaque membre
 - [ ] Health `/actuator/health` passe DOWN si le SMTP est injoignable → vérifier `MAIL_*` en prod, ou exclure le mail du health (`management.health.mail.enabled=false`)
 
 ## Pre-Deploy
@@ -78,6 +79,17 @@ Stack complète lancée en local (Docker Compose + Mailpit), données de `seed_t
 - [ ] Rollback plan below read and understood
 - [ ] Gym managers at **both sites** told about the deploy window (pick closing hours — reception can't scan during downtime)
 - [ ] Fallback at reception: paper list / manual entry during the window
+
+## Import des membres (registre papier)
+
+Données dans `data/import-membres/` (**hors git** — dépôt public). 283 membres, 303 paiements.
+- [ ] Faire relire par le client les lignes de `registre.csv` / `paiements.csv` dont la colonne `a_verifier` est remplie (noms illisibles, numéros raturés, doublons 585/645, 663/727, 600/601) ; corriger les CSV
+- [ ] Trouver le numéro de carte de **Daouda Diallo** (écrit « 37 », déjà pris par Moustapha Diouf) — non importé
+- [ ] 6 membres sans téléphone (27, 111, 602, 604, 621, 772) : à compléter dans l'app
+- [ ] Après la migration V4 : `python3 scripts/import_membres_papier.py > data/import-membres/import.sql`
+- [ ] `docker exec -i gymtrack_db psql -U gymtrack -d gymtrack_db -v ON_ERROR_STOP=1 < data/import-membres/import.sql` (rejouable)
+- [ ] Contrôle : nombre de membres = 283 de plus ; un membre payé fin septembre (ex. 779) est autorisé au scan
+- [ ] Ne pas rejouer l'import après que la caisse a commencé à saisir des paiements pour les mêmes membres sans relire : les paiements « IMPORT-PAPIER » sont recréés (les paiements saisis dans l'app ne sont pas touchés)
 
 ## Deploy
 

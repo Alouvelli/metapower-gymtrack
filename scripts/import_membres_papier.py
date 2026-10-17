@@ -10,23 +10,28 @@ Règles :
   - numéro de carte = numéro papier : 575 → MBR-0575
   - membres = registre + membres présents uniquement sur les feuilles de paiement
   - plan Mensuel pour tous ; statut ACTIF ; QR généré (gen_random_uuid)
-  - mensualités PAYÉES : mois d'inscription + chaque ligne des feuilles de paiement
-    (mois concerné = mois de la date de paiement ; un seul paiement par membre et par mois)
+  - mensualités PAYÉES : inscription + chaque ligne des feuilles de paiement ;
+    période « de date à date » comme dans l'app : payé le 29/09 → valable jusqu'au 28/10,
+    un paiement fait avant la fin de la période en cours démarre au lendemain de celle-ci ;
+    deux paiements à moins de 15 jours d'écart = le même paiement (ex. inscription + feuille)
   - lignes sans numéro de carte (colonne « numero » vide) : ignorées et listées
-  - rejouable : ON CONFLICT / NOT EXISTS, rien n'est dupliqué
+  - rejouable : membres ON CONFLICT DO NOTHING ; paiements importés (référence IMPORT-PAPIER)
+    supprimés puis recréés à chaque exécution
 
 Usage :
   python3 scripts/import_membres_papier.py > data/import-membres/import.sql
   psql -U gymtrack -d gymtrack_db -v ON_ERROR_STOP=1 -f data/import-membres/import.sql
 """
+import calendar
 import csv
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parent.parent / 'data' / 'import-membres'
 REFERENCE = 'IMPORT-PAPIER'
+MEME_PAIEMENT_JOURS = 15
 
 # Noms écrits « Nom Prénom » ou avec civilité : (prenom, nom) explicites
 NOMS_FORCES = {
@@ -62,21 +67,42 @@ def prenom_nom(numero, complet):
     return ' '.join(mots[:-1]), mots[-1]
 
 
+def plus_un_mois(d):
+    """Même jour le mois suivant (borné à la fin du mois), comme LocalDate.plusMonths(1)."""
+    annee, mois = (d.year + 1, 1) if d.month == 12 else (d.year, d.month + 1)
+    return d.replace(year=annee, month=mois, day=min(d.day, calendar.monthrange(annee, mois)[1]))
+
+
+def periodes(dates):
+    """Dates de paiement d'un membre → [(date_paiement, debut, fin)], chaînées comme dans l'app."""
+    retenues = []
+    for d in sorted(set(dates)):
+        if retenues and (d - retenues[-1]).days < MEME_PAIEMENT_JOURS:
+            continue
+        retenues.append(d)
+    res, fin_prec = [], None
+    for d in retenues:
+        debut = max(d, fin_prec + timedelta(days=1)) if fin_prec else d
+        fin = plus_un_mois(debut) - timedelta(days=1)
+        res.append((d, debut, fin))
+        fin_prec = fin
+    return res
+
+
 def sql(s):
     return "'" + str(s).replace("'", "''") + "'"
 
 
 def main():
     membres = {}      # numero -> dict
-    paiements = {}    # (numero, mois) -> date
+    paiements = {}    # numero -> [dates de paiement]
     ignores = []
 
     for r in lire('registre.csv'):
         n = int(r['numero'])
         membres[n] = {'complet': r['nom_complet'].strip(), 'tel': telephone(r['telephone']),
                       'inscription': date_fr(r['date_inscription'])}
-        d = membres[n]['inscription']
-        paiements.setdefault((n, d.replace(day=1)), d)
+        paiements.setdefault(n, []).append(membres[n]['inscription'])
 
     for r in lire('paiements.csv'):
         if not r['numero'].strip():
@@ -89,8 +115,7 @@ def main():
                           'inscription': d}
         else:
             membres[n]['inscription'] = min(membres[n]['inscription'], d)
-        mois = d.replace(day=1)
-        paiements[(n, mois)] = min(paiements.get((n, mois), d), d)
+        paiements.setdefault(n, []).append(d)
 
     out = sys.stdout
     out.write('-- Généré par scripts/import_membres_papier.py — ne pas éditer à la main\n')
@@ -109,20 +134,24 @@ def main():
             f"{sql(m['inscription'].isoformat())}, now()\n"
             'ON CONFLICT (numero_carte) DO NOTHING;\n')
 
-    out.write('\n-- Mensualités payées\n')
-    for (n, mois), d in sorted(paiements.items()):
-        out.write(
-            'INSERT INTO mensualite (membre_id, mois_concerne, nb_mois, mois_fin, montant, date_paiement, statut, mode_paiement, reference)\n'
-            f"SELECT m.id, {sql(mois.isoformat())}, 1, {sql(mois.isoformat())}, p.prix, {sql(d.isoformat())}, "
-            f"'PAYE', 'ESPECES', {sql(REFERENCE)}\n"
-            "FROM membre m JOIN plan_abonnement p ON p.nom = 'Mensuel'\n"
-            f"WHERE m.numero_carte = {sql(f'MBR-{n:04d}')}\n"
-            '  AND NOT EXISTS (SELECT 1 FROM mensualite x WHERE x.membre_id = m.id '
-            f"AND x.mois_concerne <= {sql(mois.isoformat())} AND x.mois_fin >= {sql(mois.isoformat())});\n")
+    out.write('\n-- Mensualités payées (supprimées puis recréées : script rejouable)\n')
+    out.write(f"DELETE FROM mensualite WHERE reference = {sql(REFERENCE)};\n")
+    nb = 0
+    for n in sorted(paiements):
+        for d, debut, fin in periodes(paiements[n]):
+            nb += 1
+            out.write(
+                'INSERT INTO mensualite (membre_id, mois_concerne, nb_mois, mois_fin, date_debut, date_fin, '
+                'montant, date_paiement, statut, mode_paiement, reference)\n'
+                f"SELECT m.id, {sql(debut.replace(day=1).isoformat())}, 1, {sql(fin.replace(day=1).isoformat())}, "
+                f"{sql(debut.isoformat())}, {sql(fin.isoformat())}, p.prix, {sql(d.isoformat())}, "
+                f"'PAYE', 'ESPECES', {sql(REFERENCE)}\n"
+                "FROM membre m JOIN plan_abonnement p ON p.nom = 'Mensuel'\n"
+                f"WHERE m.numero_carte = {sql(f'MBR-{n:04d}')};\n")
 
     out.write('\nCOMMIT;\n')
 
-    print(f'-- {len(membres)} membres, {len(paiements)} mensualités', file=sys.stderr)
+    print(f'-- {len(membres)} membres, {nb} mensualités', file=sys.stderr)
     for r in ignores:
         print(f"-- IGNORÉ (numéro à confirmer) : {r['numero_ecrit']} {r['nom_complet']} {r['date_paiement']}",
               file=sys.stderr)

@@ -39,6 +39,14 @@ public class Mensualite {
     @Column(name = "mois_fin", nullable = false)
     private LocalDate moisFin;
 
+    /** Premier jour couvert (date du paiement, ou lendemain de la fin de l'abonnement en cours). */
+    @Column(name = "date_debut", nullable = false)
+    private LocalDate dateDebut;
+
+    /** Dernier jour couvert, inclus : payé le 29/09 pour 1 mois → 28/10. */
+    @Column(name = "date_fin", nullable = false)
+    private LocalDate dateFin;
+
     @Column(nullable = false)
     private Integer montant;
 

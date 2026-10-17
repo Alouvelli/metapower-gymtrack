@@ -49,8 +49,8 @@ public class GerantStatsService {
         Instant   toInst   = to.plusDays(1).atStartOfDay(zone).toInstant();
 
         long membresActifsGlobal = membreRepository.countByStatut(StatutMembre.ACTIF);
-        long membresPayesCeMois  = mensualiteRepository.countMembresPayesPourMois(
-                StatutPaiement.PAYE, from);
+        long membresPayesCeMois  = mensualiteRepository.countMembresCouverts(
+                StatutPaiement.PAYE, from, to);
 
         List<GerantSite> gerants = gerantSiteRepository.findByActifTrue();
 

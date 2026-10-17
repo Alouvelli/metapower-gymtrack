@@ -44,6 +44,8 @@ export interface Mensualite {
   moisConcerne: string;
   moisFin?: string;       // dernier mois couvert (plans multi-mois)
   nbMois?: number;
+  dateDebut: string;      // premier jour couvert
+  dateFin: string;        // dernier jour couvert (payé le 29/09 → 28/10)
   montant: number;
   datePaiement?: string;
   statut?: StatutPaiement;

@@ -92,9 +92,9 @@ public class DashboardService {
 
         long caJournalier = caMensualitesJour + caTicketsJour;
 
-        LocalDate premierDuMois = today.withDayOfMonth(1);
-        long membresPayesCeMois = mensualiteRepository.countMembresPayesPourMois(
-                StatutPaiement.PAYE, premierDuMois);
+        // Membres dont l'abonnement couvre aujourd'hui (période « de date à date »)
+        long membresPayesCeMois = mensualiteRepository.countMembresCouverts(
+                StatutPaiement.PAYE, today, today);
         double tauxRecouvrement = actifs > 0
                 ? Math.round((membresPayesCeMois * 1000.0 / actifs)) / 10.0
                 : 0.0;

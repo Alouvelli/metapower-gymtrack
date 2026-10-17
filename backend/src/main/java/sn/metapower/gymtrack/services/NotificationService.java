@@ -48,36 +48,35 @@ public class NotificationService {
         this.mensualiteRepository = mensualiteRepository;
     }
 
-    /** Tous les jours à 08:00. */
+    /** Nombre de jours avant la fin de l'abonnement où le rappel est envoyé. */
+    private static final int JOURS_AVANT_FIN = 3;
+
+    /**
+     * Tous les jours à 08:00 : rappel aux membres dont l'abonnement se termine dans
+     * {@value #JOURS_AVANT_FIN} jours (période « de date à date » propre à chaque membre).
+     * Un membre qui a déjà renouvelé a une fin plus lointaine et n'est pas relancé.
+     */
     @Scheduled(cron = "0 0 8 * * *")
     public void envoyerRappelsExpiration() {
-        LocalDate today = LocalDate.now();
-        LocalDate finMois = today.withDayOfMonth(today.lengthOfMonth());
-
-        // Déclencher uniquement quand on est à 5 jours ou moins de la fin du mois
-        if (today.until(finMois).getDays() > 5) {
-            return;
-        }
-
-        log.info("[NotificationService] Lancement des rappels d'expiration ({} → {})", today, finMois);
-
-        LocalDate moisCourant = today.withDayOfMonth(1);
+        LocalDate echeance = LocalDate.now().plusDays(JOURS_AVANT_FIN);
         int envoyes = 0;
 
         for (Membre m : membreRepository.findAll()) {
             if (m.getStatut() != StatutMembre.ACTIF) continue;
             if (m.getEmail() == null || m.getEmail().isBlank()) continue;
 
-            boolean dejaPaye = mensualiteRepository
-                    .existsCouvrant(m, StatutPaiement.PAYE, moisCourant);
+            boolean finDansTroisJours = mensualiteRepository
+                    .findDerniereFin(m, StatutPaiement.PAYE)
+                    .map(echeance::equals)
+                    .orElse(false);
 
-            if (!dejaPaye) {
-                envoyerRappel(m, finMois);
+            if (finDansTroisJours) {
+                envoyerRappel(m, echeance);
                 envoyes++;
             }
         }
 
-        log.info("[NotificationService] {} rappel(s) envoyé(s)", envoyes);
+        log.info("[NotificationService] {} rappel(s) envoyé(s) (fin d'abonnement le {})", envoyes, echeance);
     }
 
     public void envoyerRappel(Membre membre, LocalDate dateLimite) {
