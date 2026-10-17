@@ -11,7 +11,6 @@ import sn.metapower.gymtrack.exceptions.RessourceNotFoundException;
 import sn.metapower.gymtrack.repositories.MembreRepository;
 import sn.metapower.gymtrack.repositories.PlanAbonnementRepository;
 
-import java.time.Year;
 import java.util.UUID;
 
 @Service
@@ -67,10 +66,12 @@ public class MembreService {
         return qrCodeService.generatePng(m.getQrCodeToken());
     }
 
+    /**
+     * Numéro suivant dans la série du registre papier (MBR-0575, MBR-0797…) :
+     * plus grand numéro existant + 1. (L'ancien comptage « MBR-année-count+1 »
+     * redonnait un numéro déjà pris dès qu'un membre était supprimé.)
+     */
     private String generateNumeroCarte() {
-        int year = Year.now().getValue();
-        String prefix = "MBR-" + year + "-";
-        long count = membreRepository.countByNumeroCarteStartingWith(prefix) + 1;
-        return prefix + String.format("%04d", count);
+        return String.format("MBR-%04d", membreRepository.findMaxNumeroCarteSerie() + 1);
     }
 }
