@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: gymtrack_db
       POSTGRES_USER: gymtrack
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-passer}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD manquant dans .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -27,13 +27,13 @@ services:
     environment:
       DB_URL: jdbc:postgresql://db:5432/gymtrack_db
       DB_USERNAME: gymtrack
-      DB_PASSWORD: ${DB_PASSWORD:-passer}
-      JWT_SECRET: ${JWT_SECRET:-9faa372517ac1d389758d3750fc07ac00f542277f26fec1ce4593e93f64e3380}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD manquant dans .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant dans .env}
       MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
-      MAIL_USERNAME: ${MAIL_USERNAME:-no-reply@metapower.sn}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-changeme}
-      ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:-passer123}
-      DEVICE_ACCESS_KEY: ${DEVICE_ACCESS_KEY:-changeme-device-key}
+      MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME manquant dans .env}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD manquant dans .env}
+      ADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD:?ADMIN_DEFAULT_PASSWORD manquant dans .env}
+      DEVICE_ACCESS_KEY: ${DEVICE_ACCESS_KEY:?DEVICE_ACCESS_KEY manquant dans .env}
       SPRING_PROFILES_ACTIVE: prod
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:4200}
       JAVA_OPTS: "-Xmx512m"

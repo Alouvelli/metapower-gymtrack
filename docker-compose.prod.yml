@@ -1,0 +1,46 @@
+# Production : à utiliser PAR-DESSUS docker-compose.yml
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# - Seul Caddy est exposé (80/443) : HTTPS automatique (Let's Encrypt) sur ${DOMAIN}
+#   Sans nom de domaine : DOMAIN=<ip-avec-tirets>.sslip.io (ex. 41-82-10-5.sslip.io)
+# - Base, backend et frontend ne sont plus joignables depuis l'extérieur
+# - Swagger désactivé ; redémarrage automatique
+
+services:
+  db:
+    ports: !reset []
+    restart: unless-stopped
+
+  backend:
+    ports: !reset []
+    restart: unless-stopped
+    environment:
+      APP_BASE_URL: https://${DOMAIN:?DOMAIN manquant dans .env}
+      SPRINGDOC_APIDOCS_ENABLED: "false"
+      SPRINGDOC_SWAGGERUI_ENABLED: "false"
+      # Un SMTP momentanément injoignable ne doit pas marquer l'appli « DOWN »
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+
+  frontend:
+    ports: !reset []
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: gymtrack_caddy
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN manquant dans .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

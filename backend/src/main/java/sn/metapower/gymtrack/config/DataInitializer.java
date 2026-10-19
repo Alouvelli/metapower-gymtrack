@@ -53,7 +53,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setEnabled(true);
             admin.getAppRoles().add(roleRepository.findByRoleName("ROLE_ADMIN").orElseThrow());
             userRepository.save(admin);
-            log.info("[DataInitializer] Compte admin créé — username=admin, password={}", adminDefaultPassword);
+            log.info("[DataInitializer] Compte admin créé — username=admin (mot de passe : variable ADMIN_DEFAULT_PASSWORD, à changer après la 1re connexion)");
         }
     }
 }
