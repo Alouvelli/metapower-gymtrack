@@ -466,13 +466,24 @@ body {
 @media print {
   @page { size: A4 landscape; margin: 0; }
 
+  html:has(> body.printing-carte) {
+    margin: 0 !important; padding: 0 !important;
+  }
+
   body.printing-carte {
-    /* ── Reset total du layout Angular Material ── */
-    html, body {
-      margin: 0 !important; padding: 0 !important;
-      width: 297mm !important; height: 210mm !important;
-      overflow: hidden !important;
+    /* Couleurs et fonds imprimés tels quels (fond doré de la carte) */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important; padding: 0 !important;
+    width: 297mm !important; height: 210mm !important;
+    overflow: hidden !important;
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
+
+    /* ── Reset total du layout Angular Material ── */
     mat-sidenav-container {
       display: block !important;
       position: fixed !important;

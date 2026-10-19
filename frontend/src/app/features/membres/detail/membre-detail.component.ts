@@ -40,47 +40,19 @@ export class MembreDetailComponent implements OnInit {
     this.pointageSvc.parMembre(id).subscribe(list => this.pointages = list);
   }
 
+  /**
+   * Impression de la carte : la mise en page vient uniquement du CSS
+   * « @media print » activé par body.printing-carte (styles.scss).
+   * Aucun style n'est posé en JS sur le layout : avant, les styles inline
+   * (position fixed, marges à 0) restaient après l'impression et le contenu
+   * passait sous le menu, car « afterprint » était écouté APRÈS window.print()
+   * — or Chrome déclenche afterprint avant que window.print() ne rende la main.
+   */
   imprimerCarte() {
-    const html = document.documentElement;
-    const prevHtmlStyle = html.getAttribute('style') || '';
-
-    // ① Force le rendu des couleurs et arrière-plans dans tous les navigateurs
-    html.style.setProperty('-webkit-print-color-adjust', 'exact');
-    html.style.setProperty('print-color-adjust', 'exact');
-    html.style.setProperty('color-adjust', 'exact');
-
-    // ② Contourne le margin-left inline injecté par Angular Material sur mat-sidenav-content.
-    //    Le CSS !important ne suffit pas toujours face aux styles inline lors du rendu d'impression.
-    const sidenavContent = document.querySelector('mat-sidenav-content') as HTMLElement | null;
-    const prevML  = sidenavContent?.style.getPropertyValue('margin-left')  ?? '';
-    const prevMR  = sidenavContent?.style.getPropertyValue('margin-right') ?? '';
-    const prevTr  = sidenavContent?.style.getPropertyValue('transform')    ?? '';
-    const prevPos = sidenavContent?.style.getPropertyValue('position')     ?? '';
-
-    if (sidenavContent) {
-      sidenavContent.style.setProperty('margin-left',  '0',     'important');
-      sidenavContent.style.setProperty('margin-right', '0',     'important');
-      sidenavContent.style.setProperty('transform',    'none',  'important');
-      sidenavContent.style.setProperty('position',     'fixed', 'important');
-      sidenavContent.style.setProperty('top',          '0',     'important');
-      sidenavContent.style.setProperty('left',         '0',     'important');
-    }
-
-    document.body.classList.add('printing-carte');
+    const body = document.body;
+    const terminer = () => body.classList.remove('printing-carte');
+    window.addEventListener('afterprint', terminer, { once: true });   // avant print()
+    body.classList.add('printing-carte');
     window.print();
-
-    // ③ Restaure l'état après impression
-    window.addEventListener('afterprint', () => {
-      document.body.classList.remove('printing-carte');
-      html.setAttribute('style', prevHtmlStyle);
-      if (sidenavContent) {
-        prevML  ? sidenavContent.style.setProperty('margin-left',  prevML)  : sidenavContent.style.removeProperty('margin-left');
-        prevMR  ? sidenavContent.style.setProperty('margin-right', prevMR)  : sidenavContent.style.removeProperty('margin-right');
-        prevTr  ? sidenavContent.style.setProperty('transform',    prevTr)  : sidenavContent.style.removeProperty('transform');
-        prevPos ? sidenavContent.style.setProperty('position',     prevPos) : sidenavContent.style.removeProperty('position');
-        sidenavContent.style.removeProperty('top');
-        sidenavContent.style.removeProperty('left');
-      }
-    }, { once: true });
   }
 }
