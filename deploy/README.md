@@ -50,6 +50,19 @@ docker exec -i gymtrack_db psql -U gymtrack -d gymtrack_db -v ON_ERROR_STOP=1 < 
 rm backups/import.sql
 ```
 
+### Cartes membres déjà imprimées
+
+Les QR des cartes viennent de `data/import-membres/qr_tokens.csv` (hors git). **Ne jamais supprimer
+ce fichier** : l'import l'utilise pour donner en production les mêmes QR que les cartes imprimées.
+Si le fichier était perdu, les cartes imprimées seraient refusées à l'entrée.
+Le garder avec les sauvegardes (il est dans `import.sql`, envoyé sur le serveur à l'étape ci-dessus).
+
+Générer les cartes (sur le Mac, base locale à jour) :
+
+```bash
+python3 scripts/generer_cartes_pdf.py   # → data/cartes/cartes_A4.pdf, cartes_format_CB.pdf
+```
+
 ## 4. Mise en service
 
 - [ ] Se connecter avec `admin` et **changer le mot de passe**

@@ -5,17 +5,21 @@ Import des membres et paiements du registre papier → SQL PostgreSQL idempotent
 Entrées (données clients, NON versionnées — dossier data/ ignoré par git) :
   data/import-membres/registre.csv   numero;nom_complet;telephone;date_inscription;a_verifier
   data/import-membres/paiements.csv  numero_ecrit;numero;nom_complet;telephone;date_paiement;a_verifier
+  data/import-membres/qr_tokens.csv  numero;qr_code_token   (créé/complété par le script)
 
 Règles :
   - numéro de carte = numéro papier : 575 → MBR-0575
   - membres = registre + membres présents uniquement sur les feuilles de paiement
-  - plan Mensuel pour tous ; statut ACTIF ; QR généré (gen_random_uuid)
+  - plan Mensuel pour tous ; statut ACTIF
+  - QR : un jeton aléatoire par membre, tiré UNE fois et conservé dans qr_tokens.csv ;
+    les cartes imprimées, la base locale et la production utilisent donc le même QR.
+    Si un membre existe déjà avec un autre jeton, il est aligné sur le fichier.
   - mensualités PAYÉES : inscription + chaque ligne des feuilles de paiement ;
     période « de date à date » comme dans l'app : payé le 29/09 → valable jusqu'au 28/10,
     un paiement fait avant la fin de la période en cours démarre au lendemain de celle-ci ;
     deux paiements à moins de 15 jours d'écart = le même paiement (ex. inscription + feuille)
   - lignes sans numéro de carte (colonne « numero » vide) : ignorées et listées
-  - rejouable : membres ON CONFLICT DO NOTHING ; paiements importés (référence IMPORT-PAPIER)
+  - rejouable : membres existants conservés (seul le jeton QR est aligné) ; paiements importés (référence IMPORT-PAPIER)
     supprimés puis recréés à chaque exécution
 
 Usage :
@@ -26,6 +30,7 @@ import calendar
 import csv
 import re
 import sys
+import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -89,6 +94,25 @@ def periodes(dates):
     return res
 
 
+def jetons_qr(numeros):
+    """Jetons QR stables : lus dans qr_tokens.csv, complétés pour les nouveaux membres."""
+    fichier = DATA / 'qr_tokens.csv'
+    jetons = {}
+    if fichier.exists():
+        jetons = {int(r['numero']): r['qr_code_token'] for r in lire('qr_tokens.csv')}
+    nouveaux = [n for n in sorted(numeros) if n not in jetons]
+    for n in nouveaux:
+        jetons[n] = str(uuid.uuid4())
+    if nouveaux or not fichier.exists():
+        with open(fichier, 'w', encoding='utf-8', newline='') as f:
+            f.write('numero;qr_code_token\n')
+            for n in sorted(jetons):
+                f.write(f'{n};{jetons[n]}\n')
+        fichier.chmod(0o600)
+        print(f'-- {len(nouveaux)} nouveau(x) jeton(s) QR ajouté(s) à {fichier.name}', file=sys.stderr)
+    return jetons
+
+
 def sql(s):
     return "'" + str(s).replace("'", "''") + "'"
 
@@ -117,6 +141,7 @@ def main():
             membres[n]['inscription'] = min(membres[n]['inscription'], d)
         paiements.setdefault(n, []).append(d)
 
+    jetons = jetons_qr(membres)
     out = sys.stdout
     out.write('-- Généré par scripts/import_membres_papier.py — ne pas éditer à la main\n')
     out.write('BEGIN;\n\n')
@@ -130,9 +155,10 @@ def main():
         out.write(
             'INSERT INTO membre (numero_carte, nom, prenom, telephone, qr_code_token, statut, plan_id, created_at, updated_at)\n'
             f"SELECT {sql(f'MBR-{n:04d}')}, {sql(nom.upper())}, {sql(prenom)}, {sql(m['tel'])}, "
-            f"gen_random_uuid()::text, 'ACTIF', (SELECT id FROM plan_abonnement WHERE nom = 'Mensuel'), "
+            f"{sql(jetons[n])}, 'ACTIF', (SELECT id FROM plan_abonnement WHERE nom = 'Mensuel'), "
             f"{sql(m['inscription'].isoformat())}, now()\n"
-            'ON CONFLICT (numero_carte) DO NOTHING;\n')
+            'ON CONFLICT (numero_carte) DO UPDATE SET qr_code_token = EXCLUDED.qr_code_token\n'
+            '  WHERE membre.qr_code_token <> EXCLUDED.qr_code_token;\n')
 
     out.write('\n-- Mensualités payées (supprimées puis recréées : script rejouable)\n')
     out.write(f"DELETE FROM mensualite WHERE reference = {sql(REFERENCE)};\n")
