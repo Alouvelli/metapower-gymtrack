@@ -12,6 +12,10 @@ import java.util.Optional;
 
 public interface TicketEntreeRepository extends JpaRepository<TicketEntree, Long> {
     Optional<TicketEntree> findByQrCodeToken(String qrCodeToken);
+
+    /** Plus grand numéro de ticket commençant par le préfixe du jour (ex. « TKT-20261015- »). */
+    @Query("SELECT MAX(t.numero) FROM TicketEntree t WHERE t.numero LIKE CONCAT(:prefix, '%')")
+    Optional<String> findMaxNumeroByPrefix(@Param("prefix") String prefix);
     long countBySiteAndDatePaiementBetween(Site site, Instant from, Instant to);
     long countByDatePaiementBetween(Instant from, Instant to);
     List<TicketEntree> findBySiteAndDatePaiementBetween(Site site, Instant from, Instant to);
@@ -23,4 +27,22 @@ public interface TicketEntreeRepository extends JpaRepository<TicketEntree, Long
     long sumCaByPeriodAndSite(@Param("from") Instant from,
                               @Param("to") Instant to,
                               @Param("siteId") Long siteId);
+
+    // ── Requêtes filtrées par gérant (vendeur) ─────────────────────────────────
+
+    List<TicketEntree> findByVendeurId(Long userId);
+
+    @Query("SELECT COALESCE(SUM(t.prix), 0) FROM TicketEntree t " +
+           "WHERE t.vendeur.id = :userId " +
+           "AND t.datePaiement BETWEEN :from AND :to")
+    long sumCaByUserAndPeriod(@Param("userId") Long userId,
+                              @Param("from") Instant from,
+                              @Param("to") Instant to);
+
+    @Query("SELECT COUNT(t) FROM TicketEntree t " +
+           "WHERE t.vendeur.id = :userId " +
+           "AND t.datePaiement BETWEEN :from AND :to")
+    long countByUserAndPeriod(@Param("userId") Long userId,
+                              @Param("from") Instant from,
+                              @Param("to") Instant to);
 }

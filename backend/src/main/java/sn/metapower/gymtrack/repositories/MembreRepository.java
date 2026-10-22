@@ -1,6 +1,7 @@
 package sn.metapower.gymtrack.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import sn.metapower.gymtrack.entities.Membre;
 import sn.metapower.gymtrack.entities.StatutMembre;
 
@@ -12,5 +13,10 @@ public interface MembreRepository extends JpaRepository<Membre, Long> {
     boolean existsByEmail(String email);
     boolean existsByTelephone(String telephone);
     long countByNumeroCarteStartingWith(String prefix);
+
+    /** Plus grand numéro de la série « MBR-NNNN » (0 si aucun). Ignore les anciens « MBR-2026-NNNN ». */
+    @Query(value = "SELECT COALESCE(MAX(CAST(SUBSTRING(numero_carte FROM '^MBR-([0-9]+)$') AS INTEGER)), 0) FROM membre",
+           nativeQuery = true)
+    int findMaxNumeroCarteSerie();
     long countByStatut(StatutMembre statut);
 }

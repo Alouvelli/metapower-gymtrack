@@ -1,44 +1,111 @@
-<div class="page-header">
-  <a mat-icon-button routerLink="/membres"><mat-icon>arrow_back</mat-icon></a>
-  <h1>{{ id ? 'Modifier le membre' : 'Nouveau membre' }}</h1>
-</div>
+<div class="membre-form-wrapper">
 
-<mat-card class="form-card">
-  <form [formGroup]="form" (ngSubmit)="submit()" class="grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Nom</mat-label>
-      <input matInput formControlName="nom">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Prénom</mat-label>
-      <input matInput formControlName="prenom">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Téléphone</mat-label>
-      <input matInput formControlName="telephone">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Date de naissance</mat-label>
-      <input matInput type="date" formControlName="dateNaissance">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Plan d'abonnement</mat-label>
-      <mat-select formControlName="planId">
-        <mat-option *ngFor="let p of plans" [value]="p.id">
-          {{ p.nom }} — {{ p.prix }} FCFA / {{ p.dureeEnMois }} mois
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <div class="actions">
-      <button mat-stroked-button type="button" routerLink="/membres">Annuler</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="loading || form.invalid">
-        <mat-icon>save</mat-icon> Enregistrer
-      </button>
+  <!-- ══════════ HERO ══════════ -->
+  <div class="form-hero">
+    <div class="hero-deco"></div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-icon-wrap">
+          <i [class]="id ? 'fas fa-user-pen' : 'fas fa-user-plus'"></i>
+        </div>
+        <div class="hero-text">
+          <h1>{{ id ? 'Modifier le membre' : 'Nouveau membre' }}</h1>
+          <p>{{ id ? 'Mise à jour du dossier adhérent' : 'Créer un nouvel adhérent dans le système' }}</p>
+        </div>
+      </div>
+      <a class="btn-back" routerLink="/membres">
+        <i class="fas fa-arrow-left"></i>
+        <span>Retour à la liste</span>
+      </a>
     </div>
-  </form>
-</mat-card>
+  </div>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="form-body">
+    <div class="form-card">
+
+      <div class="form-card-header">
+        <div class="form-card-icon">
+          <i [class]="id ? 'fas fa-user-pen' : 'fas fa-user'"></i>
+        </div>
+        <div>
+          <h3>Informations du membre</h3>
+          <p>Renseignez les coordonnées et le plan d'abonnement</p>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="site-form">
+
+        <div class="form-row-2">
+          <div class="form-field">
+            <label>Nom <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-user field-ico"></i>
+              <input formControlName="nom" placeholder="Ex : DIALLO">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Prénom <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-user field-ico"></i>
+              <input formControlName="prenom" placeholder="Ex : Mamadou">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-field">
+            <label>Téléphone <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-phone field-ico"></i>
+              <input formControlName="telephone" placeholder="Ex : +221 77 000 00 00">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Email <span class="opt">(optionnel)</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-envelope field-ico"></i>
+              <input formControlName="email" type="email" placeholder="Ex : membre@email.com">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-field">
+            <label>Date de naissance <span class="opt">(optionnel)</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-cake-candles field-ico"></i>
+              <input formControlName="dateNaissance" type="date">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Plan d'abonnement <span class="opt">(optionnel)</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-medal field-ico"></i>
+              <select formControlName="planId" class="field-select">
+                <option [ngValue]="null">— Sans plan —</option>
+                <option *ngFor="let p of plans" [ngValue]="p.id">
+                  {{ p.nom }} — {{ p.prix | number }} FCFA / {{ p.dureeEnMois }} mois
+                </option>
+              </select>
+              <i class="fas fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <a class="btn-cancel" routerLink="/membres">
+            <i class="fas fa-times"></i> Annuler
+          </a>
+          <button type="submit" class="btn-save" [disabled]="loading || form.invalid">
+            <span class="btn-spinner" *ngIf="loading"></span>
+            <i class="fas fa-check" *ngIf="!loading"></i>
+            {{ id ? 'Enregistrer les modifications' : 'Créer le membre' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>

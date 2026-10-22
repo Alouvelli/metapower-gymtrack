@@ -1,0 +1,81 @@
+<div class="form-card app-card">
+  <div class="app-card-header">
+    <h3><i class="fas fa-user-plus"></i> Nouveau gérant</h3>
+    <button class="close-btn" (click)="cancel()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="app-card-body">
+
+    <div class="error-banner" *ngIf="errorMsg">
+      <i class="fas fa-triangle-exclamation"></i> {{ errorMsg }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+
+      <div class="form-row two-cols">
+        <div class="form-field">
+          <label>Nom <span class="req">*</span></label>
+          <input formControlName="nom" placeholder="DIOP" [class.error]="form.get('nom')?.invalid && form.get('nom')?.touched">
+        </div>
+        <div class="form-field">
+          <label>Prénom <span class="req">*</span></label>
+          <input formControlName="prenom" placeholder="Moussa" [class.error]="form.get('prenom')?.invalid && form.get('prenom')?.touched">
+        </div>
+      </div>
+
+      <div class="form-row two-cols">
+        <div class="form-field">
+          <label>Nom d'utilisateur <span class="req">*</span></label>
+          <input formControlName="username" placeholder="moussa.diop" [class.error]="form.get('username')?.invalid && form.get('username')?.touched">
+        </div>
+        <div class="form-field">
+          <label>Email</label>
+          <input formControlName="email" type="email" placeholder="moussa@metapower.sn">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Mot de passe <span class="req">*</span></label>
+          <div class="password-wrap">
+            <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
+                   placeholder="Minimum 6 caractères"
+                   [class.error]="form.get('password')?.invalid && form.get('password')?.touched">
+            <button type="button" class="pw-toggle" (click)="showPassword = !showPassword">
+              <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Salle <span class="req">*</span></label>
+          <select formControlName="siteId" [class.error]="form.get('siteId')?.invalid && form.get('siteId')?.touched">
+            <option [ngValue]="null" disabled>Sélectionner une salle…</option>
+            <option *ngFor="let s of sites" [ngValue]="s.id">{{ s.nom }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row two-cols">
+        <div class="form-field">
+          <label>Heure début <span class="req">*</span></label>
+          <input formControlName="heureDebut" type="time" [class.error]="form.get('heureDebut')?.invalid && form.get('heureDebut')?.touched">
+        </div>
+        <div class="form-field">
+          <label>Heure fin <span class="req">*</span></label>
+          <input formControlName="heureFin" type="time" [class.error]="form.get('heureFin')?.invalid && form.get('heureFin')?.touched">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="cancel()">Annuler</button>
+        <button type="submit" class="btn-submit" [disabled]="loading">
+          <span *ngIf="!loading"><i class="fas fa-user-plus"></i> Créer le gérant</span>
+          <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> Création…</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

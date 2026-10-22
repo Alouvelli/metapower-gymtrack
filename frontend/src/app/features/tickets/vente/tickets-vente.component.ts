@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroupDirective, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TicketService } from '../../../core/services/ticket.service';
 import { SiteService } from '../../../core/services/site.service';
@@ -18,12 +18,14 @@ export class TicketsVenteComponent implements OnInit {
   dernier?: TicketVenteResponse;
   loading = false;
 
+  @ViewChild(FormGroupDirective) private formDir?: FormGroupDirective;
+
   form = this.fb.group({
     tarifId: [null as number | null, Validators.required],
     siteId: [null as number | null, Validators.required],
     modePaiement: ['ESPECES', Validators.required],
     nomClient: [''],
-    telephoneClient: ['']
+    telephoneClient: ['', Validators.required]
   });
 
   constructor(private fb: FormBuilder,
@@ -54,17 +56,20 @@ export class TicketsVenteComponent implements OnInit {
         this.dernier = r;
         this.loading = false;
         this.snack.open('Ticket vendu — N° ' + r.numero, 'OK', { duration: 3000 });
-        this.form.patchValue({ nomClient: '', telephoneClient: '' });
+        // Vide les champs client pour la vente suivante (salle, tarif et mode de paiement
+        // conservés). resetForm remet aussi « submitted » à false : sinon Material
+        // affiche tout de suite l'erreur « Numéro WhatsApp obligatoire ».
+        this.formDir?.resetForm({ ...this.form.value, nomClient: '', telephoneClient: '' });
       },
-      error: () => {
+      error: err => {
         this.loading = false;
-        this.snack.open('Erreur lors de la vente', 'OK', { duration: 3000 });
+        this.snack.open(err?.error?.message || 'Erreur lors de la vente', 'OK', { duration: 4000 });
       }
     });
   }
 
   imprimerRecu() {
     if (!this.dernier?.id) return;
-    window.open(`${environment.apiUrl}/api/tickets/${this.dernier.id}/recu`, '_blank');
+    window.open(`${environment.apiUrl}/api/public/tickets/${this.dernier.qrCodeToken}/recu`, '_blank');
   }
 }

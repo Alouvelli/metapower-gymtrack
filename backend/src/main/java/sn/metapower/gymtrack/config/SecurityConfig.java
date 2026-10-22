@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -19,6 +20,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
@@ -58,6 +61,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        // ── Converter JWT : scope "ROLE_ADMIN" → authority "ROLE_ADMIN" (sans préfixe SCOPE_) ──
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        authoritiesConverter.setAuthorityPrefix("");           // supprime le préfixe "SCOPE_"
+        authoritiesConverter.setAuthoritiesClaimName("scope"); // lit le claim "scope"
+        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+        jwtConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+
         http
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -74,8 +85,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/pointages/scan").hasAuthority("ROLE_DEVICE")
                         // Photos membres et reçus tickets en lecture publique
                         .requestMatchers("/files/view/**", "/files/download/**").permitAll()
-                        // Reçu PDF ticket — ouvert dans un nouvel onglet (pas de JWT possible)
-                        .requestMatchers("/api/tickets/*/recu").permitAll()
+                        // Ticket public (page WhatsApp du client, QR, reçu PDF) — par token UUID,
+                        // jamais par id séquentiel (sinon on récupère les QR valides des autres)
+                        .requestMatchers(HttpMethod.GET, "/api/public/tickets/**").permitAll()
                         // QR code membres — chargé via <img src> (pas de JWT possible)
                         .requestMatchers("/api/membres/*/qrcode").permitAll()
                         // Tout le reste : JWT requis
@@ -87,7 +99,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
                 )
-                .oauth2ResourceServer(oa -> oa.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(oa -> oa.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter)));
 
         return http.build();
     }
@@ -116,7 +128,9 @@ public class SecurityConfig {
         cors.setAllowedOriginPatterns(List.of(
                 appBaseUrl,
                 "http://localhost:4200",
-                "http://localhost:4300"
+                "http://localhost:4300",
+                "http://192.168.*.*:4200",   // réseau local WiFi — tablette
+                "http://192.168.*.*:8090"    // accès direct API depuis réseau local
         ));
         cors.setAllowCredentials(true);
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

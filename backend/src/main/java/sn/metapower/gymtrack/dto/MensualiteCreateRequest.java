@@ -7,7 +7,9 @@ import java.time.LocalDate;
 
 public record MensualiteCreateRequest(
         @NotNull Long membreId,
-        @NotNull LocalDate moisConcerne,
+        // Début de la période couverte ; vide = date du paiement, ou lendemain
+        // de la fin de l'abonnement en cours s'il n'est pas encore terminé
+        LocalDate dateDebut,
         @NotNull Integer montant,
         @NotNull ModePaiement modePaiement,
         String reference,

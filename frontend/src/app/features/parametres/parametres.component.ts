@@ -13,6 +13,10 @@ export class ParametresComponent implements OnInit {
 
   plans: PlanAbonnement[] = [];
   edit: PlanAbonnement | null = null;
+  activeTab: 'plans' | 'securite' = 'plans';
+
+  get plansActifs():   number { return this.plans.filter(p => p.actif !== false).length; }
+  get plansInactifs(): number { return this.plans.filter(p => p.actif === false).length; }
 
   form = this.fb.group({
     nom: ['', Validators.required],

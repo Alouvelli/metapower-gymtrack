@@ -4,11 +4,15 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import sn.metapower.gymtrack.dto.TicketVenteRequest;
 import sn.metapower.gymtrack.dto.TicketVenteResponse;
+import sn.metapower.gymtrack.entities.AppUser;
 import sn.metapower.gymtrack.entities.TicketEntree;
+import sn.metapower.gymtrack.repositories.AppUserRepository;
 import sn.metapower.gymtrack.repositories.TicketEntreeRepository;
+import sn.metapower.gymtrack.services.WhatsAppService;
 import sn.metapower.gymtrack.services.QrCodeService;
 import sn.metapower.gymtrack.services.RecuPdfService;
 import sn.metapower.gymtrack.services.TicketService;
@@ -23,19 +27,35 @@ public class TicketController {
     private final TicketEntreeRepository ticketRepository;
     private final RecuPdfService recuPdfService;
     private final QrCodeService qrCodeService;
+    private final AppUserRepository userRepository;
+    private final WhatsAppService whatsAppService;
 
     public TicketController(TicketService ticketService,
                             TicketEntreeRepository ticketRepository,
                             RecuPdfService recuPdfService,
-                            QrCodeService qrCodeService) {
+                            QrCodeService qrCodeService,
+                            AppUserRepository userRepository,
+                            WhatsAppService whatsAppService) {
         this.ticketService = ticketService;
         this.ticketRepository = ticketRepository;
         this.recuPdfService = recuPdfService;
         this.qrCodeService = qrCodeService;
+        this.userRepository = userRepository;
+        this.whatsAppService = whatsAppService;
     }
 
+    /**
+     * Liste tous les tickets.
+     * Pour un ROLE_GERANT : filtrés sur ceux qu'il a lui-même vendus.
+     */
     @GetMapping
-    public List<TicketEntree> findAll() {
+    public List<TicketEntree> findAll(Authentication authentication) {
+        boolean isGerant = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_GERANT"));
+        if (isGerant) {
+            AppUser user = userRepository.findByUsername(authentication.getName());
+            return ticketRepository.findByVendeurId(user.getId());
+        }
         return ticketRepository.findAll();
     }
 
@@ -48,7 +68,8 @@ public class TicketController {
     public TicketVenteResponse vendre(@Valid @RequestBody TicketVenteRequest request) {
         TicketEntree ticket = ticketService.vendre(request);
         String qrBase64 = qrCodeService.generatePngBase64(ticket.getQrCodeToken());
-        return TicketVenteResponse.from(ticket, qrBase64);
+        return TicketVenteResponse.from(ticket, qrBase64,
+                whatsAppService.lienTicket(ticket), whatsAppService.lienWhatsApp(ticket));
     }
 
     @GetMapping(value = "/{id}/recu", produces = MediaType.APPLICATION_PDF_VALUE)

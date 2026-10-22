@@ -1,50 +1,37 @@
-/* ═══════════════ LOGIN — Thème DOCADS ═══════════════ */
-.login-page {
-  position: relative;
+// Restauré depuis le cache de build Angular (version de mai 2026) — CSS compilé reconverti
+.login-page { position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background:
-    radial-gradient(ellipse at top left, rgba(102, 126, 234, 0.35) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(118, 75, 162, 0.35) 0%, transparent 50%),
-    linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  overflow: hidden;
-}
-
-/* Formes décoratives flottantes */
-.bg-shape {
-  position: absolute;
+  background: radial-gradient(ellipse at top left, rgba(212, 160, 23, 0.28) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(212, 160, 23, 0.18) 0%, transparent 50%), linear-gradient(135deg, #0A0A0A 0%, #111111 100%);
+  overflow: hidden; }
+.bg-shape { position: absolute;
   border-radius: 50%;
   filter: blur(80px);
   opacity: 0.55;
   pointer-events: none;
-  animation: float 12s ease-in-out infinite;
-
-  &.s1 {
-    width: 380px; height: 380px;
-    top: -120px; left: -100px;
-    background: radial-gradient(circle, #667eea, transparent 70%);
-  }
-  &.s2 {
-    width: 320px; height: 320px;
-    bottom: -100px; right: -80px;
-    background: radial-gradient(circle, #764ba2, transparent 70%);
-    animation-delay: 3s;
-  }
-  &.s3 {
-    width: 220px; height: 220px;
-    top: 40%; right: 20%;
-    background: radial-gradient(circle, #a5b4fc, transparent 70%);
-    animation-delay: 6s;
-    opacity: 0.3;
-  }
-}
-
-/* Card login */
-.login-card {
-  position: relative;
+  animation: float 12s ease-in-out infinite; }
+.bg-shape.s1 { width: 420px;
+  height: 420px;
+  top: -140px;
+  left: -120px;
+  background: radial-gradient(circle, #D4A017, transparent 70%); }
+.bg-shape.s2 { width: 340px;
+  height: 340px;
+  bottom: -110px;
+  right: -90px;
+  background: radial-gradient(circle, #8B6900, transparent 70%);
+  animation-delay: 3s; }
+.bg-shape.s3 { width: 240px;
+  height: 240px;
+  top: 40%;
+  right: 20%;
+  background: radial-gradient(circle, #F0CC5A, transparent 70%);
+  animation-delay: 6s;
+  opacity: 0.2; }
+.login-card { position: relative;
   z-index: 2;
   width: 100%;
   max-width: 440px;
@@ -55,58 +42,49 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  animation: fadeUp 0.6s var(--ease) both;
-}
-
-/* Brand */
-.brand {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.brand-logo {
-  width: 72px; height: 72px;
+  animation: fadeUp 0.6s var(--ease) both; }
+.brand { text-align: center;
+  margin-bottom: 28px; }
+.brand-logo { width: 110px;
+  height: 110px;
   margin: 0 auto 14px;
-  border-radius: 20px;
-  background: var(--primary-gradient);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px;
-  color: #fff;
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.45);
-  animation: pulse-card 3s ease-in-out infinite;
-}
-
-.brand-title {
-  margin: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: pulse-card 3s ease-in-out infinite; }
+.brand-logo::after { content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(212, 160, 23, 0.4);
+  animation: logo-ring 3s ease-in-out infinite; }
+.brand-logo-img { width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 8px 24px rgba(212, 160, 23, 0.5)); }
+.brand-title { margin: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 26px;
   font-weight: 800;
   letter-spacing: 2px;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.brand-sub {
-  margin: 6px 0 0;
+  background-clip: text; }
+.brand-sub { margin: 6px 0 0;
   color: var(--text-secondary);
   font-size: 12.5px;
   letter-spacing: 0.6px;
-  text-transform: uppercase;
-}
-
-/* Form */
-.login-form {
-  display: flex;
+  text-transform: uppercase; }
+.login-form { display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
+  gap: 6px; }
 .full { width: 100%; }
-
-.erreur {
-  display: flex;
+.erreur { display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -117,11 +95,8 @@
   font-size: 13px;
   font-weight: 600;
   margin: 4px 0 12px;
-  animation: fadeUp 0.3s var(--ease) both;
-}
-
-.login-btn {
-  height: 48px !important;
+  animation: fadeUp 0.3s var(--ease) both; }
+.login-btn { height: 48px !important;
   font-size: 14px !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px;
@@ -134,33 +109,24 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: var(--transition) !important;
-
-  &:hover:not([disabled]) {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 32px rgba(102, 126, 234, 0.5) !important;
-  }
-
-  &[disabled] {
-    opacity: 0.6;
-    background: linear-gradient(135deg, #94a3b8, #64748b) !important;
-    box-shadow: none !important;
-  }
-
-  i { font-size: 14px; }
+  transition: var(--transition) !important; }
+.login-btn:hover:not([disabled]) { transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(212, 160, 23, 0.5) !important; }
+.login-btn[disabled] { opacity: 0.6;
+  background: linear-gradient(135deg, #94a3b8, #64748b) !important;
+  box-shadow: none !important; }
+.login-btn i { font-size: 14px; }
+@keyframes logo-ring {
+0%, 100% { transform: scale(1);
+    opacity: 0.4; }
+50% { transform: scale(1.1);
+    opacity: 0.7; }
 }
-
-/* Footer */
-.login-footer {
-  text-align: center;
+.login-footer { text-align: center;
   margin-top: 22px;
   padding-top: 16px;
-  border-top: 1px solid var(--border-light);
-
-  span {
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-  }
-}
+  border-top: 1px solid var(--border-light); }
+.login-footer span { font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.6px;
+  text-transform: uppercase; }

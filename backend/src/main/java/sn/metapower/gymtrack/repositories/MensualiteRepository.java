@@ -22,9 +22,52 @@ public interface MensualiteRepository extends JpaRepository<Mensualite, Long> {
                                      @Param("from") LocalDate from,
                                      @Param("to") LocalDate to);
 
-    /** Nombre de membres distincts ayant payé leur mensualité pour un mois donné. */
+    /** Nombre de membres distincts dont un paiement couvre au moins un jour de [debut, fin]. */
     @Query("SELECT COUNT(DISTINCT m.membre.id) FROM Mensualite m " +
-           "WHERE m.statut = :statut AND m.moisConcerne = :moisConcerne")
-    long countMembresPayesPourMois(@Param("statut") StatutPaiement statut,
-                                   @Param("moisConcerne") LocalDate moisConcerne);
+           "WHERE m.statut = :statut AND m.dateDebut <= :fin AND m.dateFin >= :debut")
+    long countMembresCouverts(@Param("statut") StatutPaiement statut,
+                              @Param("debut") LocalDate debut,
+                              @Param("fin") LocalDate fin);
+
+    /** Vrai si un paiement du membre couvre le jour donné. */
+    @Query("SELECT COUNT(m) > 0 FROM Mensualite m " +
+           "WHERE m.membre = :membre AND m.statut = :statut " +
+           "AND m.dateDebut <= :jour AND m.dateFin >= :jour")
+    boolean existsCouvrant(@Param("membre") Membre membre,
+                           @Param("statut") StatutPaiement statut,
+                           @Param("jour") LocalDate jour);
+
+    /** Paiements du membre qui chevauchent la période [debut, fin]. */
+    @Query("SELECT m FROM Mensualite m " +
+           "WHERE m.membre = :membre AND m.statut = :statut " +
+           "AND m.dateDebut <= :fin AND m.dateFin >= :debut")
+    List<Mensualite> findChevauchant(@Param("membre") Membre membre,
+                                     @Param("statut") StatutPaiement statut,
+                                     @Param("debut") LocalDate debut,
+                                     @Param("fin") LocalDate fin);
+
+    /** Dernier jour couvert par les paiements du membre (vide s'il n'a jamais payé). */
+    @Query("SELECT MAX(m.dateFin) FROM Mensualite m WHERE m.membre = :membre AND m.statut = :statut")
+    Optional<LocalDate> findDerniereFin(@Param("membre") Membre membre,
+                                        @Param("statut") StatutPaiement statut);
+
+    // ── Requêtes filtrées par gérant (enregistrePar) ──────────────────────────
+
+    List<Mensualite> findByEnregistreParId(Long userId);
+
+    @Query("SELECT COALESCE(SUM(m.montant), 0) FROM Mensualite m " +
+           "WHERE m.enregistrePar.id = :userId " +
+           "AND m.statut = :statut " +
+           "AND m.datePaiement BETWEEN :from AND :to")
+    long sumMontantByUserAndPeriod(@Param("userId") Long userId,
+                                   @Param("statut") StatutPaiement statut,
+                                   @Param("from") LocalDate from,
+                                   @Param("to") LocalDate to);
+
+    @Query("SELECT COUNT(m) FROM Mensualite m " +
+           "WHERE m.enregistrePar.id = :userId " +
+           "AND m.datePaiement BETWEEN :from AND :to")
+    long countByUserAndPeriod(@Param("userId") Long userId,
+                              @Param("from") LocalDate from,
+                              @Param("to") LocalDate to);
 }

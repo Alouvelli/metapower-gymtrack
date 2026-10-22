@@ -1,57 +1,200 @@
-<div class="page-header">
-  <div>
-    <h1>Salles</h1>
-    <p class="muted">Gestion du réseau multisite</p>
-  </div>
-  <button mat-flat-button color="primary" (click)="nouveau()">
-    <mat-icon>add_business</mat-icon> Nouvelle salle
-  </button>
-</div>
+<div class="sites-wrapper">
 
-<div class="grid">
-  <mat-card *ngFor="let s of sites" class="site-card">
-    <div class="head">
-      <mat-icon>store</mat-icon>
-      <div class="grow">
-        <div class="nom">{{ s.nom }}</div>
-        <div class="addr">{{ s.adresse || '—' }}</div>
+  <!-- ══════════ HERO ══════════ -->
+  <div class="sites-hero">
+    <div class="hero-deco"></div>
+
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-icon-wrap">
+          <i class="fas fa-building"></i>
+        </div>
+        <div class="hero-text">
+          <h1>Salles &amp; Sites</h1>
+          <p>Gérez votre réseau de {{ sites.length }} salle{{ sites.length > 1 ? 's' : '' }}</p>
+        </div>
       </div>
-      <span class="dot" [class.on]="s.actif"></span>
+      <button class="btn-add-hero" (click)="nouveau()">
+        <i class="fas fa-plus"></i>
+        <span>Nouvelle salle</span>
+      </button>
     </div>
-    <div class="meta">
-      <div><mat-icon>phone</mat-icon> {{ s.telephone || '—' }}</div>
-      <div><mat-icon>mail</mat-icon> {{ s.email || '—' }}</div>
+
+    <!-- Stats strip -->
+    <div class="hero-stats">
+      <div class="h-stat">
+        <span class="h-stat-val">{{ sites.length }}</span>
+        <span class="h-stat-lbl">Total</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ sitesActifs }}</span>
+        <span class="h-stat-lbl">Actives</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ sitesInactifs }}</span>
+        <span class="h-stat-lbl">Inactives</span>
+      </div>
     </div>
-    <div class="actions">
-      <button mat-button color="primary" (click)="modifier(s)"><mat-icon>edit</mat-icon> Modifier</button>
-      <button mat-button color="warn" (click)="supprimer(s)"><mat-icon>delete</mat-icon></button>
+  </div>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="sites-body">
+
+    <!-- GRID -->
+    <div class="sites-grid" *ngIf="sites.length > 0">
+      <div *ngFor="let s of sites; let i = index"
+           class="site-card"
+           [style.--delay]="(i * 0.07) + 's'">
+
+        <!-- Animated gold stripe at top -->
+        <div class="card-stripe" [class.inactive]="!s.actif"></div>
+
+        <!-- Card head -->
+        <div class="card-head">
+          <div class="site-logo">
+            <i class="fas fa-dumbbell"></i>
+          </div>
+          <div class="site-title-block">
+            <div class="site-name">{{ s.nom }}</div>
+            <div class="site-address">
+              <i class="fas fa-location-dot"></i>
+              <span>{{ s.adresse || 'Adresse non renseignée' }}</span>
+            </div>
+          </div>
+          <span class="status-pill" [class.active]="s.actif">
+            <span class="pulse-dot" *ngIf="s.actif"></span>
+            {{ s.actif ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+
+        <div class="card-div"></div>
+
+        <!-- Contact info -->
+        <div class="card-contacts">
+          <div class="contact-row">
+            <div class="contact-icon"><i class="fas fa-phone"></i></div>
+            <span class="contact-val">{{ s.telephone || 'Non renseigné' }}</span>
+          </div>
+          <div class="contact-row">
+            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+            <span class="contact-val">{{ s.email || 'Non renseigné' }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button class="action-btn edit-btn" (click)="modifier(s)">
+            <i class="fas fa-pen"></i>
+            <span>Modifier</span>
+          </button>
+          <button class="action-btn del-btn" (click)="supprimer(s)" matTooltip="Supprimer">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+
+      </div>
     </div>
-  </mat-card>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="sites.length === 0">
+      <div class="empty-icon-wrap">
+        <i class="fas fa-building"></i>
+      </div>
+      <h3>Aucune salle configurée</h3>
+      <p>Ajoutez votre première salle pour constituer votre réseau multisite.</p>
+      <button class="btn-add-hero" (click)="nouveau()">
+        <i class="fas fa-plus"></i>
+        <span>Ajouter une salle</span>
+      </button>
+    </div>
+
+  </div>
 </div>
 
-<mat-card class="form-card" *ngIf="edit">
-  <h3>{{ edit.id ? 'Modifier la salle' : 'Nouvelle salle' }}</h3>
-  <form [formGroup]="form" (ngSubmit)="enregistrer()" class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Nom</mat-label>
-      <input matInput formControlName="nom">
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Téléphone</mat-label>
-      <input matInput formControlName="telephone">
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="span2">
-      <mat-label>Adresse</mat-label>
-      <input matInput formControlName="adresse">
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="span2">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email">
-    </mat-form-field>
-    <mat-checkbox formControlName="actif">Salle active</mat-checkbox>
-    <div class="actions">
-      <button mat-stroked-button type="button" (click)="annuler()">Annuler</button>
-      <button mat-flat-button color="primary" type="submit">Enregistrer</button>
+<!-- ══════════ MODAL FORM ══════════ -->
+<div class="modal-backdrop" [class.show]="edit !== null" (click)="annuler()">
+  <div class="modal-panel" (click)="$event.stopPropagation()" *ngIf="edit !== null">
+
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-icon">
+          <i class="fas" [class.fa-pen]="edit.id" [class.fa-plus]="!edit.id"></i>
+        </div>
+        <div>
+          <h3>{{ edit.id ? 'Modifier la salle' : 'Nouvelle salle' }}</h3>
+          <p>{{ edit.id ? 'Mettez à jour les informations de la salle' : 'Renseignez les informations de la nouvelle salle' }}</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="annuler()">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-  </form>
-</mat-card>
+
+    <div class="modal-body">
+      <form [formGroup]="form" (ngSubmit)="enregistrer()" class="site-form">
+
+        <div class="form-row-2">
+          <div class="form-field">
+            <label>Nom de la salle <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-building field-ico"></i>
+              <input formControlName="nom" placeholder="Ex : Metapower Dakar Centre">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Téléphone</label>
+            <div class="field-wrap">
+              <i class="fas fa-phone field-ico"></i>
+              <input formControlName="telephone" placeholder="+221 77 000 00 00">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Adresse</label>
+          <div class="field-wrap">
+            <i class="fas fa-location-dot field-ico"></i>
+            <input formControlName="adresse" placeholder="Ex : Plateau, Dakar">
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Email</label>
+          <div class="field-wrap">
+            <i class="fas fa-envelope field-ico"></i>
+            <input formControlName="email" placeholder="contact@metapower.gym">
+          </div>
+        </div>
+
+        <!-- Toggle actif -->
+        <div class="form-toggle">
+          <div class="toggle-info">
+            <i class="fas fa-circle-check"></i>
+            <div>
+              <strong>Salle active</strong>
+              <span>Les membres peuvent accéder à cette salle</span>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="actif">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="annuler()">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn-save" [disabled]="form.invalid">
+            <i class="fas fa-check"></i>
+            {{ edit.id ? 'Enregistrer' : 'Créer la salle' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

@@ -3,7 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MembreService } from '../../../core/services/membre.service';
 import { MensualiteService } from '../../../core/services/mensualite.service';
-import { Membre, Mensualite } from '../../../core/models/models';
+import { PointageService } from '../../../core/services/pointage.service';
+import { Membre, Mensualite, PointageMembre } from '../../../core/models/models';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -14,12 +15,15 @@ import { environment } from '../../../../environments/environment';
 export class MembreDetailComponent implements OnInit {
   membre?: Membre;
   mensualites: Mensualite[] = [];
+  pointages: PointageMembre[] = [];
   qrUrl?: SafeUrl;
   loading = false;
+  activeTab: 'infos' | 'carte' | 'mensualites' | 'pointages' = 'infos';
 
   constructor(private route: ActivatedRoute,
               private membreSvc: MembreService,
               private mensSvc: MensualiteService,
+              private pointageSvc: PointageService,
               private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
@@ -33,7 +37,22 @@ export class MembreDetailComponent implements OnInit {
       this.loading = false;
     });
     this.mensSvc.parMembre(id).subscribe(list => this.mensualites = list);
+    this.pointageSvc.parMembre(id).subscribe(list => this.pointages = list);
   }
 
-  imprimerCarte() { window.print(); }
+  /**
+   * Impression de la carte : la mise en page vient uniquement du CSS
+   * « @media print » activé par body.printing-carte (styles.scss).
+   * Aucun style n'est posé en JS sur le layout : avant, les styles inline
+   * (position fixed, marges à 0) restaient après l'impression et le contenu
+   * passait sous le menu, car « afterprint » était écouté APRÈS window.print()
+   * — or Chrome déclenche afterprint avant que window.print() ne rende la main.
+   */
+  imprimerCarte() {
+    const body = document.body;
+    const terminer = () => body.classList.remove('printing-carte');
+    window.addEventListener('afterprint', terminer, { once: true });   // avant print()
+    body.classList.add('printing-carte');
+    window.print();
+  }
 }

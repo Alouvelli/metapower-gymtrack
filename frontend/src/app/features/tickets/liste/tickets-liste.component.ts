@@ -16,6 +16,9 @@ export class TicketsListeComponent implements OnInit, AfterViewInit {
 
   constructor(private ticketSvc: TicketService) {}
 
+  get ticketsValides():  number { return this.ds.data.filter(t => t.statut === 'VALIDE').length; }
+  get ticketsUtilises(): number { return this.ds.data.filter(t => t.statut === 'UTILISE').length; }
+
   ngOnInit() {
     this.ticketSvc.liste().subscribe(t => this.ds.data = t);
   }

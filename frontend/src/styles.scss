@@ -2,8 +2,8 @@
 @use '@angular/material' as mat;
 @include mat.core();
 
-$mp-primary: mat.define-palette(mat.$indigo-palette, 800);
-$mp-accent:  mat.define-palette(mat.$amber-palette, 600);
+$mp-primary: mat.define-palette(mat.$amber-palette, 800);
+$mp-accent:  mat.define-palette(mat.$amber-palette, 400);
 $mp-warn:    mat.define-palette(mat.$red-palette);
 
 $mp-theme: mat.define-light-theme((
@@ -35,14 +35,14 @@ body {
   --mp-warning: #F39C12;
   --mp-danger: #E74C3C;
 
-  /* Thème DOCADS — Brand */
-  --primary: #667eea;
-  --primary-dark: #764ba2;
-  --primary-darker: #5a67d8;
-  --primary-light: #a5b4fc;
-  --primary-lighter: #eef2ff;
-  --primary-rgb: 102, 126, 234;
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Thème METAPOWER — Gold & Black (identité verrouillée) */
+  --primary:          #D4A017;
+  --primary-dark:     #8B6900;
+  --primary-darker:   #6B5000;
+  --primary-light:    #F0CC5A;
+  --primary-lighter:  rgba(212,160,23,0.10);
+  --primary-rgb:      212, 160, 23;
+  --primary-gradient: linear-gradient(135deg, #D4A017 0%, #8B6900 100%);
 
   /* Statuts */
   --success: #10b981;
@@ -62,15 +62,15 @@ body {
   --teal-light: #ccfbf1;
 
   /* Texte */
-  --text-primary: #0f172a;
+  --text-primary: #111111;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
 
   /* Surfaces */
   --bg-page: #f4f6fb;
   --bg-card: #ffffff;
-  --border-color: rgba(15, 23, 42, 0.08);
-  --border-light: rgba(15, 23, 42, 0.04);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-light: rgba(0, 0, 0, 0.04);
 
   /* Border radius */
   --radius-sm: 10px;
@@ -83,7 +83,7 @@ body {
   --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.12);
-  --shadow-primary: 0 8px 24px rgba(102, 126, 234, 0.28);
+  --shadow-primary: 0 8px 24px rgba(212,160,23, 0.28);
   --shadow-success: 0 8px 24px rgba(16, 185, 129, 0.25);
   --shadow-danger: 0 8px 24px rgba(244, 63, 94, 0.25);
   --shadow-warning: 0 8px 24px rgba(245, 158, 11, 0.25);
@@ -129,11 +129,11 @@ body {
 }
 @keyframes pulse-card {
   0%, 100% { box-shadow: var(--shadow-primary); }
-  50%       { box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5); }
+  50%       { box-shadow: 0 12px 40px rgba(212,160,23, 0.5); }
 }
 @keyframes pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(102,126,234,0.4); }
-  50%       { transform: scale(1.2); opacity: 0.7; box-shadow: 0 0 0 6px rgba(102,126,234,0); }
+  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(212,160,23,0.4); }
+  50%       { transform: scale(1.2); opacity: 0.7; box-shadow: 0 0 0 6px rgba(212,160,23,0); }
 }
 @keyframes sparkle {
   0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
@@ -145,39 +145,26 @@ body {
    Réutilisées par toutes les pages features
 ═══════════════════════════════════════════════════ */
 
-/* PAGE HEADER — bannière en haut de chaque page */
+/* PAGE HEADER — bannière haut de page — identité META POWER */
 .page-header {
   position: relative;
-  background: var(--primary-gradient);
+  background:
+    radial-gradient(ellipse at 90% 20%, rgba(212,160,23,0.18) 0%, transparent 45%),
+    radial-gradient(ellipse at 5%  80%, rgba(240,204,90,0.10) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='rgba(255,255,255,0.04)'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #111111 0%, #1C1500 45%, #8B6900 100%);
+  background-size: auto, auto, 32px 32px, 100% 100%;
   border-radius: var(--radius-lg);
   padding: 28px 32px;
   margin-bottom: 24px;
   color: #fff;
   overflow: hidden;
-  box-shadow: var(--shadow-primary);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(212,160,23,0.15);
   animation: fadeUp 0.5s var(--ease) both;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -40%; right: -10%;
-    width: 320px; height: 320px;
-    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -50%; left: 30%;
-    width: 240px; height: 240px;
-    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-  }
 
   .page-header-content {
     position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -194,13 +181,13 @@ body {
   .page-header-icon {
     width: 56px; height: 56px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(212,160,23,0.22);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(212,160,23,0.35);
     display: flex; align-items: center; justify-content: center;
     font-size: 22px;
-    color: #fff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    color: #F0CC5A;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
   .page-header-title {
@@ -215,7 +202,7 @@ body {
   .page-header-subtitle {
     font-size: 13.5px;
     margin: 4px 0 0;
-    opacity: 0.85;
+    opacity: 0.78;
     color: #fff;
   }
 
@@ -226,26 +213,30 @@ body {
   }
 
   .header-btn {
-    background: rgba(255, 255, 255, 0.18);
+    background: linear-gradient(135deg, #D4A017, #8B6900);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 10px 18px;
+    border: none;
+    padding: 10px 20px;
     border-radius: 10px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 13.5px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     transition: var(--transition);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 14px rgba(139,105,0,0.4);
+    text-decoration: none;
+
+    i { font-size: 12px; }
 
     &:hover {
-      background: #fff;
-      color: var(--primary);
+      filter: brightness(1.1);
       transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 22px rgba(139,105,0,0.5);
+      color: #fff;
     }
+    &:active { transform: translateY(0); }
   }
 }
 
@@ -265,7 +256,7 @@ body {
     justify-content: space-between;
     gap: 16px;
     border-bottom: 1px solid var(--border-light);
-    background: linear-gradient(180deg, #fafbff 0%, #fff 100%);
+    background: linear-gradient(180deg, #fdfcf8 0%, #fff 100%);
 
     h3 {
       margin: 0;
@@ -306,7 +297,7 @@ body {
     gap: 14px;
     flex-wrap: wrap;
     border-bottom: 1px solid var(--border-light);
-    background: linear-gradient(180deg, #fafbff 0%, #fff 100%);
+    background: linear-gradient(180deg, #fdfcf8 0%, #fff 100%);
 
     .table-title {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -342,7 +333,7 @@ body {
     background: transparent;
 
     th.mat-mdc-header-cell {
-      background: #fafbff;
+      background: #fdfcf8;
       color: var(--text-secondary);
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 11.5px;
@@ -362,7 +353,7 @@ body {
 
     tr.mat-mdc-row {
       transition: background 0.2s var(--ease);
-      &:hover { background: rgba(102, 126, 234, 0.04); }
+      &:hover { background: rgba(212, 160, 23, 0.04); }
     }
   }
 
@@ -408,7 +399,7 @@ body {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 12px 28px rgba(212, 160, 23, 0.4);
   }
 }
 
@@ -425,19 +416,21 @@ body {
 
   i {
     font-size: 48px;
-    color: var(--primary-light);
-    opacity: 0.6;
+    color: #D4A017;
+    opacity: 0.55;
     margin-bottom: 16px;
+    display: block;
   }
 
   h4 {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-secondary);
   }
 
-  p { margin: 0; font-size: 13.5px; }
+  p { margin: 0; font-size: 13.5px; line-height: 1.6; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -457,12 +450,148 @@ body {
   box-shadow: var(--shadow-primary) !important;
   border-radius: 10px !important;
 
-  &:hover { box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4) !important; }
+  &:hover { box-shadow: 0 12px 28px rgba(212, 160, 23, 0.4) !important; }
 }
 
 .mat-mdc-stroked-button {
   border-radius: 10px !important;
   border-color: var(--border-color) !important;
+}
+
+/* ═══════════════════════════════════════
+   IMPRESSION — Carte membre pleine page
+   Activée par body.printing-carte
+   Format : A4 paysage sans marges — la carte occupe toute la feuille
+═══════════════════════════════════════ */
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+
+  html:has(> body.printing-carte) {
+    margin: 0 !important; padding: 0 !important;
+  }
+
+  body.printing-carte {
+    /* Couleurs et fonds imprimés tels quels (fond doré de la carte) */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important; padding: 0 !important;
+    width: 297mm !important; height: 210mm !important;
+    overflow: hidden !important;
+
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* ── Reset total du layout Angular Material ── */
+    mat-sidenav-container {
+      display: block !important;
+      position: fixed !important;
+      top: 0 !important; left: 0 !important;
+      width: 297mm !important; height: 210mm !important;
+    }
+    mat-sidenav { display: none !important; width: 0 !important; }
+    mat-sidenav-content {
+      /* Détache du layout sidenav — écrase le margin-left inline d'Angular Material */
+      position: fixed !important;
+      top: 0 !important; left: 0 !important;
+      margin: 0 !important;
+      width: 297mm !important; height: 210mm !important;
+      min-width: 0 !important; overflow: hidden !important;
+      transform: none !important;
+    }
+    .content { padding: 0 !important; margin: 0 !important; overflow: hidden !important; }
+
+    /* ── Masquer tout le shell ── */
+    .topbar                                          { display: none !important; }
+    app-membre-detail .detail-hero                   { display: none !important; }
+    app-membre-detail .tab-nav                       { display: none !important; }
+    app-membre-detail .carte-hint                    { display: none !important; }
+    app-membre-detail .carte-actions                 { display: none !important; }
+    app-membre-detail .tab-panel:not(.carte-tab)     { display: none !important; }
+
+    /* ── Supprimer tout padding/margin de l'arborescence ── */
+    app-membre-detail                 { display: block !important; width: 297mm !important; height: 210mm !important; overflow: hidden !important; }
+    app-membre-detail .detail-wrapper { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+    app-membre-detail .detail-body    { padding: 0 !important; margin: 0 !important; }
+    app-membre-detail .tab-panel      { padding: 0 !important; margin: 0 !important; }
+    app-membre-detail .carte-tab      { padding: 0 !important; gap: 0 !important; align-items: flex-start !important;
+                                        display: block !important; }
+    app-membre-detail .carte-preview-wrap {
+      filter: none !important;
+      width: 297mm !important; height: 210mm !important;
+      display: block !important; overflow: hidden !important;
+      margin: 0 !important; padding: 0 !important;
+    }
+
+    /* ── Carte pleine page A4 paysage (297 × 210 mm) ── */
+    app-membre-detail .cp-card {
+      width: 297mm !important;
+      height: 210mm !important;
+      border-radius: 0 !important;
+      background: linear-gradient(145deg, #E8B420 0%, #C49010 40%, #8B6900 100%) !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    /* Stripe */
+    app-membre-detail .cp-stripe {
+      height: 3.5mm !important;
+      background: linear-gradient(90deg, #1A0E00, #3A2800, #5C4300, #3A2800, #1A0E00) !important;
+    }
+
+    /* Fond décoratif — logo filigrane recentré */
+    app-membre-detail .cp-bg-logo {
+      width: 200mm !important; height: 200mm !important;
+      right: 140mm !important;
+      opacity: 0.07 !important;
+    }
+    app-membre-detail .cp-bg-pattern { opacity: 0.5 !important; background-size: 28px 28px !important; }
+
+    /* Header */
+    app-membre-detail .cp-header     { padding: 7mm 10mm 3mm !important; }
+    app-membre-detail .cp-logo-img   { width: 24mm !important; height: 24mm !important; border-radius: 4mm !important; }
+    app-membre-detail .cp-brand      { gap: 6mm !important; }
+    app-membre-detail .cp-brand-name { font-size: 10mm !important; letter-spacing: 1.5mm !important; }
+    app-membre-detail .cp-brand-sub  { font-size: 6.5mm !important; }
+    app-membre-detail .cp-type-badge {
+      font-size: 5.5mm !important;
+      padding: 2mm 7mm !important;
+      border-radius: 2mm !important;
+      letter-spacing: 2mm !important;
+    }
+
+    /* Corps */
+    app-membre-detail .cp-body    { padding: 0 10mm !important; gap: 8mm !important; }
+
+    /* Infos texte */
+    app-membre-detail .cp-nom          { font-size: 13mm !important; letter-spacing: 0.6mm !important; }
+    app-membre-detail .cp-prenom       { font-size: 9mm !important; margin-top: 1.5mm !important; }
+    app-membre-detail .cp-divider      { margin-bottom: 5mm !important; }
+    app-membre-detail .cp-name-block   { margin-bottom: 5mm !important; }
+    app-membre-detail .cp-details-block { gap: 3mm !important; }
+    app-membre-detail .cp-num          { font-size: 7mm !important; letter-spacing: 0.3mm !important;
+                                         i { font-size: 6mm !important; } }
+    app-membre-detail .cp-plan,
+    app-membre-detail .cp-tel          { font-size: 7mm !important;
+                                         i { font-size: 6mm !important; } }
+
+    /* QR — héros de la carte imprimée */
+    app-membre-detail .cp-qr-wrap    {
+      width: 125mm !important; height: 125mm !important;
+      border-radius: 5mm !important;
+      padding: 4mm !important;
+      box-shadow: 0 0 0 2mm rgba(0,0,0,0.15), 0 4mm 12mm rgba(0,0,0,0.22) !important;
+    }
+    /* Pied */
+    app-membre-detail .cp-footer       { padding: 5mm 10mm !important; font-size: 6mm !important; }
+    app-membre-detail .cp-footer-brand { letter-spacing: 1.5mm !important; }
+    app-membre-detail .cp-dots         { font-size: 8mm !important; }
+    app-membre-detail .cp-social       { font-size: 7mm !important; gap: 8mm !important;
+                                         span { gap: 3mm !important; }
+                                         i { font-size: 9mm !important; } }
+  }
 }
 
 .mat-mdc-form-field {
@@ -479,6 +608,51 @@ body {
   &.snack-error   .mdc-snackbar__surface { background: var(--danger)  !important; }
   &.snack-warning .mdc-snackbar__surface { background: var(--warning) !important; }
 }
+
+/* ═══════════════════════════════════════════════════
+   DARK MODE — variables & overrides globaux
+═══════════════════════════════════════════════════ */
+body.dark-mode {
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted:     #475569;
+  --bg-page:        #080808;
+  --bg-card:        #111111;
+  --border-color:   rgba(255, 255, 255, 0.07);
+  --border-light:   rgba(255, 255, 255, 0.04);
+  --shadow-sm:      0 2px 10px rgba(0, 0, 0, 0.25);
+  --shadow-md:      0 8px 32px rgba(0, 0, 0, 0.35);
+
+  /* Theme transition animation */
+  &.theme-transition * { transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease !important; }
+
+  /* Angular Material cards */
+  .mat-mdc-card { background: var(--bg-card) !important; border-color: var(--border-color) !important; }
+
+  /* Page card backgrounds */
+  .app-card, .app-table-card {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+
+    .app-card-header, .table-toolbar {
+      background: linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 100%);
+      border-bottom-color: var(--border-light);
+    }
+    th.mat-mdc-header-cell { background: rgba(255,255,255,.03); color: var(--text-secondary); border-bottom-color: var(--border-color); }
+    td.mat-mdc-cell { color: var(--text-primary); border-bottom-color: var(--border-light); }
+    tr.mat-mdc-row:hover { background: rgba(212,160,23, 0.04); }
+  }
+
+  /* Status badges — darker bg */
+  .status-badge.success { background: rgba(16, 185, 129, 0.15); }
+  .status-badge.warning { background: rgba(245, 158, 11, 0.15); }
+  .status-badge.danger  { background: rgba(244, 63, 94, 0.15); }
+  .status-badge.violet  { background: rgba(139, 92, 246, 0.15); }
+  .status-badge.primary { background: rgba(212,160,23, 0.15); }
+}
+
+/* Light theme transition */
+body.theme-transition * { transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease !important; }
 
 @media print {
   app-layout mat-sidenav, .topbar, .page-header button { display: none !important; }

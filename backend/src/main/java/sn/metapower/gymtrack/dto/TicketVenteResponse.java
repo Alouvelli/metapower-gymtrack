@@ -14,9 +14,13 @@ public record TicketVenteResponse(
         Integer prix,
         String modePaiement,
         Instant dateValidite,
-        String nomClient
+        String nomClient,
+        String telephoneClient,
+        String lienTicket,
+        String lienWhatsApp
 ) {
-    public static TicketVenteResponse from(TicketEntree t, String qrBase64) {
+    public static TicketVenteResponse from(TicketEntree t, String qrBase64,
+                                           String lienTicket, String lienWhatsApp) {
         return new TicketVenteResponse(
                 t.getId(),
                 t.getNumero(),
@@ -27,7 +31,10 @@ public record TicketVenteResponse(
                 t.getPrix(),
                 t.getModePaiement().name(),
                 t.getDateValidite(),
-                t.getNomClient()
+                t.getNomClient(),
+                t.getTelephoneClient(),
+                lienTicket,
+                lienWhatsApp
         );
     }
 }

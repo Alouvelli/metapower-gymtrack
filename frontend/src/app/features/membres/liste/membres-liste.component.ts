@@ -34,6 +34,9 @@ export class MembresListeComponent implements OnInit, AfterViewInit {
     this.ds.sort = this.sort;
   }
 
+  get membresActifs():   number { return this.ds.data.filter(m => m.statut === 'ACTIF').length; }
+  get membresInactifs(): number { return this.ds.data.filter(m => m.statut !== 'ACTIF').length; }
+
   filtrer(value: string) {
     this.ds.filter = value.trim().toLowerCase();
   }

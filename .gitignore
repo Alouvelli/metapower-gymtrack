@@ -31,3 +31,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Données clients réelles (noms, téléphones) — ne jamais commiter (dépôt public)
+data/
+backups/

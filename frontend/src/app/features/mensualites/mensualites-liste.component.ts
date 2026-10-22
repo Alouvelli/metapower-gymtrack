@@ -23,7 +23,7 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
 
   form = this.fb.group({
     membreId: [null as number | null, Validators.required],
-    moisConcerne: ['', Validators.required],
+    dateDebut: [''],   // vide = calculé par le serveur (paiement ou fin d'abonnement en cours)
     montant: [0, Validators.required],
     modePaiement: ['ESPECES', Validators.required],
     reference: ['']
@@ -50,6 +50,9 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() { this.ds.paginator = this.paginator; }
 
+  get totalPaye():     number { return this.ds.data.filter(m => m.statut === 'PAYE').length; }
+  get totalEnAttente(): number { return this.ds.data.filter(m => m.statut === 'EN_ATTENTE').length; }
+
   charger() {
     this.mensSvc.liste().subscribe(d => this.ds.data = d);
   }
@@ -59,7 +62,7 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
     const v = this.form.value;
     const payload = {
       membreId: v.membreId,
-      moisConcerne: v.moisConcerne + '-01',
+      dateDebut: v.dateDebut || null,
       montant: v.montant,
       modePaiement: v.modePaiement,
       reference: v.reference
@@ -71,7 +74,7 @@ export class MensualitesListeComponent implements OnInit, AfterViewInit {
         this.form.reset({ modePaiement: 'ESPECES', montant: 0 });
         this.charger();
       },
-      error: () => this.snack.open('Erreur d\'enregistrement', 'OK', { duration: 3000 })
+      error: err => this.snack.open(err?.error?.message || 'Erreur d\'enregistrement', 'OK', { duration: 4000 })
     });
   }
 }

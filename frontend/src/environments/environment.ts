@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080',
+  apiUrl: 'http://192.168.1.245:8090',
   appName: 'METAPOWER GymTrack'
 };

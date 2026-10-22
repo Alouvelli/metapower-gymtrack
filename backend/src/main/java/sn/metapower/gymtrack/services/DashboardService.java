@@ -33,7 +33,17 @@ public class DashboardService {
         this.siteRepository = siteRepository;
     }
 
+    /** Stats globales ou filtrées par site (admin). */
     public DashboardStats getStats(Long siteId) {
+        return getStats(siteId, null);
+    }
+
+    /**
+     * Stats filtrées par site et, optionnellement, par gérant (userId).
+     * Quand gerantUserId != null : CA mensualités et tickets limités aux transactions
+     * enregistrées par ce gérant.
+     */
+    public DashboardStats getStats(Long siteId, Long gerantUserId) {
         Site site = null;
         String siteNom = "Toutes les salles";
         if (siteId != null) {
@@ -42,22 +52,19 @@ public class DashboardService {
             siteNom = site.getNom();
         }
 
-        // Bornes "aujourd'hui" et "ce mois-ci"
         ZoneId zone = ZoneId.systemDefault();
-        LocalDate today = LocalDate.now();
-        Instant dayStart = today.atStartOfDay(zone).toInstant();
-        Instant dayEnd = today.plusDays(1).atStartOfDay(zone).toInstant();
+        LocalDate today      = LocalDate.now();
+        Instant dayStart     = today.atStartOfDay(zone).toInstant();
+        Instant dayEnd       = today.plusDays(1).atStartOfDay(zone).toInstant();
         LocalDate monthStart = today.withDayOfMonth(1);
-        LocalDate monthEnd = monthStart.plusMonths(1).minusDays(1);
-        Instant monthStartI = monthStart.atStartOfDay(zone).toInstant();
-        Instant monthEndI = monthStart.plusMonths(1).atStartOfDay(zone).toInstant();
+        LocalDate monthEnd   = monthStart.plusMonths(1).minusDays(1);
+        Instant monthStartI  = monthStart.atStartOfDay(zone).toInstant();
+        Instant monthEndI    = monthStart.plusMonths(1).atStartOfDay(zone).toInstant();
 
-        // Membres : agrégats globaux (les membres ne sont pas rattachés à un site)
-        long actifs = membreRepository.countByStatut(StatutMembre.ACTIF);
-        long enRetard = membreRepository.countByStatut(StatutMembre.EXPIRE);
+        long actifs    = membreRepository.countByStatut(StatutMembre.ACTIF);
+        long enRetard  = membreRepository.countByStatut(StatutMembre.EXPIRE);
         long suspendus = membreRepository.countByStatut(StatutMembre.SUSPENDU);
 
-        // Activité du jour
         long pointagesJour = (site != null)
                 ? pointageRepository.countBySiteAndHeureEntreeBetween(site, dayStart, dayEnd)
                 : pointageRepository.countByHeureEntreeBetween(dayStart, dayEnd);
@@ -65,21 +72,29 @@ public class DashboardService {
                 ? ticketRepository.countBySiteAndDatePaiementBetween(site, dayStart, dayEnd)
                 : ticketRepository.countByDatePaiementBetween(dayStart, dayEnd);
 
-        // CA du jour
-        long caMensualitesJour = mensualiteRepository.sumMontantByStatutAndPeriod(
-                StatutPaiement.PAYE, today, today);
-        long caTicketsJour = ticketRepository.sumCaByPeriodAndSite(dayStart, dayEnd, siteId);
+        // CA du jour et du mois — filtrés par gérant si renseigné
+        long caMensualitesJour, caMensualites, caTicketsJour, caTickets;
+        if (gerantUserId != null) {
+            caMensualitesJour = mensualiteRepository.sumMontantByUserAndPeriod(
+                    gerantUserId, StatutPaiement.PAYE, today, today);
+            caMensualites = mensualiteRepository.sumMontantByUserAndPeriod(
+                    gerantUserId, StatutPaiement.PAYE, monthStart, monthEnd);
+            caTicketsJour = ticketRepository.sumCaByUserAndPeriod(gerantUserId, dayStart, dayEnd);
+            caTickets = ticketRepository.sumCaByUserAndPeriod(gerantUserId, monthStartI, monthEndI);
+        } else {
+            caMensualitesJour = mensualiteRepository.sumMontantByStatutAndPeriod(
+                    StatutPaiement.PAYE, today, today);
+            caMensualites = mensualiteRepository.sumMontantByStatutAndPeriod(
+                    StatutPaiement.PAYE, monthStart, monthEnd);
+            caTicketsJour = ticketRepository.sumCaByPeriodAndSite(dayStart, dayEnd, siteId);
+            caTickets = ticketRepository.sumCaByPeriodAndSite(monthStartI, monthEndI, siteId);
+        }
+
         long caJournalier = caMensualitesJour + caTicketsJour;
 
-        // CA du mois — mensualités globales (pas de notion de site sur Mensualite)
-        long caMensualites = mensualiteRepository.sumMontantByStatutAndPeriod(
-                StatutPaiement.PAYE, monthStart, monthEnd);
-        long caTickets = ticketRepository.sumCaByPeriodAndSite(monthStartI, monthEndI, siteId);
-
-        // Taux de recouvrement mensuel
-        LocalDate premierDuMois = today.withDayOfMonth(1);
-        long membresPayesCeMois = mensualiteRepository.countMembresPayesPourMois(
-                StatutPaiement.PAYE, premierDuMois);
+        // Membres dont l'abonnement couvre aujourd'hui (période « de date à date »)
+        long membresPayesCeMois = mensualiteRepository.countMembresCouverts(
+                StatutPaiement.PAYE, today, today);
         double tauxRecouvrement = actifs > 0
                 ? Math.round((membresPayesCeMois * 1000.0 / actifs)) / 10.0
                 : 0.0;

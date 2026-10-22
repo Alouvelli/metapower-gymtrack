@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
+import { gerantGuard } from './core/guards/gerant.guard';
 import { LayoutComponent } from './shared/layout/layout.component';
 
 const routes: Routes = [
@@ -19,6 +21,13 @@ const routes: Routes = [
       import('./features/pointages/scanner/scanner.module').then(m => m.ScannerModule)
   },
 
+  // Ticket client (lien envoyé par WhatsApp, route publique → token QR)
+  {
+    path: 't/:token',
+    loadChildren: () =>
+      import('./features/ticket-public/ticket-public.module').then(m => m.TicketPublicModule)
+  },
+
   // Modules protégés sous le shell layout
   {
     path: '',
@@ -35,6 +44,7 @@ const routes: Routes = [
       },
       {
         path: 'sites',
+        canActivate: [adminGuard],
         loadChildren: () => import('./features/sites/sites.module').then(m => m.SitesModule)
       },
       {
@@ -51,11 +61,23 @@ const routes: Routes = [
       },
       {
         path: 'rapports',
+        canActivate: [adminGuard],
         loadChildren: () => import('./features/rapports/rapports.module').then(m => m.RapportsModule)
       },
       {
         path: 'parametres',
+        canActivate: [adminGuard],
         loadChildren: () => import('./features/parametres/parametres.module').then(m => m.ParametresModule)
+      },
+      {
+        path: 'gerants',
+        canActivate: [adminGuard],
+        loadChildren: () => import('./features/gerants/gerants.module').then(m => m.GerantsModule)
+      },
+      {
+        path: 'mes-transactions',
+        canActivate: [gerantGuard],
+        loadChildren: () => import('./features/mes-transactions/mes-transactions.module').then(m => m.MesTransactionsModule)
       }
     ]
   },

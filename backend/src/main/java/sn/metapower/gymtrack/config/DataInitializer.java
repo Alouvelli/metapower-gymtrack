@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        List.of("ROLE_ADMIN", "ROLE_RECEPTIONNISTE", "ROLE_CAISSIER").forEach(name ->
+        List.of("ROLE_ADMIN", "ROLE_RECEPTIONNISTE", "ROLE_CAISSIER", "ROLE_GERANT").forEach(name ->
                 roleRepository.findByRoleName(name)
                         .orElseGet(() -> roleRepository.save(new AppRole(name))));
 
@@ -53,7 +53,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setEnabled(true);
             admin.getAppRoles().add(roleRepository.findByRoleName("ROLE_ADMIN").orElseThrow());
             userRepository.save(admin);
-            log.info("[DataInitializer] Compte admin créé — username=admin, password={}", adminDefaultPassword);
+            log.info("[DataInitializer] Compte admin créé — username=admin (mot de passe : variable ADMIN_DEFAULT_PASSWORD, à changer après la 1re connexion)");
         }
     }
 }

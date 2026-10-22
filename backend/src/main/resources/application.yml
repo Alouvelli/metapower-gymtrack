@@ -4,7 +4,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/gymtrack_db}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:M@wdosy1.}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -22,8 +22,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: 587
-    username: ${MAIL_USERNAME:no-reply@groupeisi.com}
-    password: ${MAIL_PASSWORD:kdow lhlf hbww jcat}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -41,13 +41,15 @@ server:
     context-path: /
 
 jwt:
-  secret-key: ${JWT_SECRET:9faa372517ac1d389758d3750fc07ac00f542277f26fec1ce4593e93f64e3380}
+  # Aucune valeur par défaut pour les secrets : sans variable d'environnement,
+  # l'appli refuse de démarrer (les anciennes valeurs sont publiques sur GitHub)
+  secret-key: ${JWT_SECRET}
   expiration-hours: 8
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:4200}
-  device-access-key: ${DEVICE_ACCESS_KEY:changeme-device-key}
-  admin-default-password: ${ADMIN_DEFAULT_PASSWORD:passer123}
+  device-access-key: ${DEVICE_ACCESS_KEY}
+  admin-default-password: ${ADMIN_DEFAULT_PASSWORD}
 
 springdoc:
   api-docs:

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ScanResponse } from '../models/models';
+import { PointageMembre, ScanResponse } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class PointageService {
@@ -19,5 +19,9 @@ export class PointageService {
 
   jour(siteId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/site/${siteId}/jour`);
+  }
+
+  parMembre(membreId: number): Observable<PointageMembre[]> {
+    return this.http.get<PointageMembre[]>(`${this.base}/membre/${membreId}`);
   }
 }

@@ -1,63 +1,217 @@
-<div class="page-header">
-  <div>
-    <h1>Paramètres</h1>
-    <p class="muted">Plans d'abonnement et configuration</p>
-  </div>
-</div>
+<div class="params-wrapper">
 
-<mat-tab-group>
-  <mat-tab label="Plans d'abonnement">
-    <div class="tab-body">
-      <div class="bar">
-        <button mat-flat-button color="primary" (click)="nouveau()">
-          <mat-icon>add</mat-icon> Nouveau plan
+  <!-- ══════════ HERO ══════════ -->
+  <div class="params-hero">
+    <div class="hero-deco"></div>
+
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-icon-wrap">
+          <i class="fas fa-gear" [class.spinning]="activeTab === 'plans'"></i>
+        </div>
+        <div class="hero-text">
+          <h1>Paramètres</h1>
+          <p>Configuration des plans d'abonnement et accès système</p>
+        </div>
+      </div>
+      <button class="btn-add-hero" (click)="nouveau()" *ngIf="activeTab === 'plans'">
+        <i class="fas fa-plus"></i>
+        <span>Nouveau plan</span>
+      </button>
+    </div>
+
+    <!-- Stats strip — visible sur l'onglet Plans -->
+    <div class="hero-stats" *ngIf="activeTab === 'plans'">
+      <div class="h-stat">
+        <span class="h-stat-val">{{ plans.length }}</span>
+        <span class="h-stat-lbl">Total</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ plansActifs }}</span>
+        <span class="h-stat-lbl">Actifs</span>
+      </div>
+      <div class="h-stat-sep"></div>
+      <div class="h-stat">
+        <span class="h-stat-val">{{ plansInactifs }}</span>
+        <span class="h-stat-lbl">Inactifs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ BODY ══════════ -->
+  <div class="params-body">
+
+    <!-- Tab nav custom -->
+    <div class="tab-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'plans'" (click)="activeTab = 'plans'">
+        <i class="fas fa-id-badge"></i>
+        <span>Plans d'abonnement</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'securite'" (click)="activeTab = 'securite'">
+        <i class="fas fa-shield-alt"></i>
+        <span>Sécurité</span>
+      </button>
+    </div>
+
+    <!-- ════ TAB PLANS ════ -->
+    <div class="tab-panel" *ngIf="activeTab === 'plans'">
+
+      <div class="plans-grid" *ngIf="plans.length > 0">
+        <div *ngFor="let p of plans; let i = index"
+             class="plan-card"
+             [class.is-inactive]="p.actif === false"
+             [style.--delay]="(i * 0.07) + 's'">
+
+          <div class="card-stripe" [class.inactive]="p.actif === false"></div>
+
+          <div class="plan-head">
+            <div class="plan-logo" [class.inactive]="p.actif === false">
+              <i class="fas fa-id-badge"></i>
+            </div>
+            <div class="plan-title-block">
+              <div class="plan-name">{{ p.nom }}</div>
+              <div class="plan-dur">
+                <i class="fas fa-calendar-days"></i>
+                <span>{{ p.dureeEnMois }} mois</span>
+              </div>
+            </div>
+            <span class="status-pill" [class.active]="p.actif !== false">
+              <span class="pulse-dot" *ngIf="p.actif !== false"></span>
+              {{ p.actif !== false ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+
+          <div class="plan-price-block">
+            <span class="plan-price">{{ p.prix | number:'1.0-0' }}</span>
+            <span class="plan-currency">FCFA</span>
+            <div class="plan-period">
+              <i class="fas fa-clock"></i> {{ p.dureeEnMois }} mois
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="action-btn edit-btn" (click)="modifier(p)">
+              <i class="fas fa-pen"></i>
+              <span>Modifier</span>
+            </button>
+            <button class="action-btn del-btn" (click)="supprimer(p)" matTooltip="Supprimer">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state-custom" *ngIf="plans.length === 0">
+        <div class="empty-icon-wrap">
+          <i class="fas fa-id-badge"></i>
+        </div>
+        <h3>Aucun plan configuré</h3>
+        <p>Créez votre premier plan d'abonnement pour permettre les inscriptions.</p>
+        <button class="btn-add-hero" (click)="nouveau()">
+          <i class="fas fa-plus"></i>
+          <span>Créer un plan</span>
         </button>
       </div>
 
-      <div class="grid">
-        <mat-card *ngFor="let p of plans" class="plan-card" [class.disabled]="p.actif === false">
-          <mat-icon>card_membership</mat-icon>
-          <h3>{{ p.nom }}</h3>
-          <div class="prix">{{ p.prix }} FCFA</div>
-          <div class="duree">{{ p.dureeEnMois }} mois</div>
-          <div class="actions">
-            <button mat-button color="primary" (click)="modifier(p)"><mat-icon>edit</mat-icon></button>
-            <button mat-button color="warn" (click)="supprimer(p)"><mat-icon>delete</mat-icon></button>
+    </div>
+
+    <!-- ════ TAB SECURITE ════ -->
+    <div class="tab-panel" *ngIf="activeTab === 'securite'">
+      <div class="security-card">
+        <div class="sec-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="sec-body">
+          <h4>Gestion des accès</h4>
+          <p>La gestion des utilisateurs et des affectations staff/salle se fait directement depuis la base de données pour la version Standard. Une interface dédiée pourra être ajoutée en évolution.</p>
+          <div class="sec-tags">
+            <span class="sec-tag"><i class="fas fa-lock"></i> Authentification JWT</span>
+            <span class="sec-tag"><i class="fas fa-database"></i> Rôles en base</span>
+            <span class="sec-tag"><i class="fas fa-code-branch"></i> v1 Pilote</span>
           </div>
-        </mat-card>
+        </div>
       </div>
+    </div>
 
-      <mat-card class="form-card" *ngIf="edit">
-        <h3>{{ edit.id ? 'Modifier le plan' : 'Nouveau plan' }}</h3>
-        <form [formGroup]="form" (ngSubmit)="enregistrer()" class="form-grid">
-          <mat-form-field appearance="outline">
-            <mat-label>Nom du plan</mat-label>
-            <input matInput formControlName="nom">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Durée (mois)</mat-label>
-            <input matInput type="number" formControlName="dureeEnMois">
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Prix (FCFA)</mat-label>
-            <input matInput type="number" formControlName="prix">
-          </mat-form-field>
-          <mat-checkbox formControlName="actif">Plan actif</mat-checkbox>
-          <div class="actions-row">
-            <button mat-stroked-button type="button" (click)="edit = null">Annuler</button>
-            <button mat-flat-button color="primary" type="submit">Enregistrer</button>
+  </div>
+</div>
+
+<!-- ══════════ MODAL PLAN ══════════ -->
+<div class="modal-backdrop" [class.show]="edit !== null" (click)="edit = null">
+  <div class="modal-panel" (click)="$event.stopPropagation()" *ngIf="edit !== null">
+
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-icon">
+          <i class="fas" [class.fa-pen]="edit.id" [class.fa-plus]="!edit.id"></i>
+        </div>
+        <div>
+          <h3>{{ edit.id ? 'Modifier le plan' : 'Nouveau plan' }}</h3>
+          <p>{{ edit.id ? 'Mettez à jour les caractéristiques' : 'Définissez les caractéristiques du plan' }}</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="edit = null">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="form" (ngSubmit)="enregistrer()" class="plan-form">
+
+        <div class="form-field">
+          <label>Nom du plan <span class="req">*</span></label>
+          <div class="field-wrap">
+            <i class="fas fa-id-badge field-ico"></i>
+            <input formControlName="nom" placeholder="Ex : Mensuel Standard">
           </div>
-        </form>
-      </mat-card>
-    </div>
-  </mat-tab>
+        </div>
 
-  <mat-tab label="Sécurité">
-    <div class="tab-body">
-      <mat-card class="info-card">
-        <mat-icon>info</mat-icon>
-        <p>La gestion des utilisateurs et des affectations staff/salle se fait directement depuis la base de données pour la version Standard. Une interface dédiée pourra être ajoutée en évolution.</p>
-      </mat-card>
+        <div class="form-row-2">
+          <div class="form-field">
+            <label>Durée (mois) <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-calendar field-ico"></i>
+              <input type="number" formControlName="dureeEnMois" placeholder="1" min="1">
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Prix (FCFA) <span class="req">*</span></label>
+            <div class="field-wrap">
+              <i class="fas fa-coins field-ico"></i>
+              <input type="number" formControlName="prix" placeholder="25000" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-toggle">
+          <div class="toggle-info">
+            <i class="fas fa-circle-check"></i>
+            <div>
+              <strong>Plan actif</strong>
+              <span>Ce plan sera disponible à la souscription</span>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="actif">
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="edit = null">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn-save" [disabled]="form.invalid">
+            <i class="fas fa-check"></i>
+            {{ edit.id ? 'Enregistrer' : 'Créer le plan' }}
+          </button>
+        </div>
+
+      </form>
     </div>
-  </mat-tab>
-</mat-tab-group>
+
+  </div>
+</div>

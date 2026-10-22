@@ -11,4 +11,5 @@ public interface PointageRepository extends JpaRepository<Pointage, Long> {
     List<Pointage> findBySiteAndHeureEntreeBetween(Site site, Instant from, Instant to);
     long countBySiteAndHeureEntreeBetween(Site site, Instant from, Instant to);
     long countByHeureEntreeBetween(Instant from, Instant to);
+    List<Pointage> findByMembreIdOrderByHeureEntreeDesc(Long membreId);
 }

@@ -1,0 +1,11 @@
+# HTTPS automatique (certificat Let's Encrypt) pour le domaine défini dans .env
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy frontend:80
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}

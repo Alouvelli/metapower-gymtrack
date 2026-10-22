@@ -15,7 +15,7 @@ export interface PlanAbonnement {
   actif?: boolean;
 }
 
-export type StatutMembre = 'ACTIF' | 'EXPIRE' | 'SUSPENDU';
+export type StatutMembre = 'ACTIF' | 'EXPIRE' | 'SUSPENDU' | 'EN_RETARD';
 
 export interface Membre {
   id?: number;
@@ -42,6 +42,10 @@ export interface Mensualite {
   membre?: Membre;
   membreId?: number;
   moisConcerne: string;
+  moisFin?: string;       // dernier mois couvert (plans multi-mois)
+  nbMois?: number;
+  dateDebut: string;      // premier jour couvert
+  dateFin: string;        // dernier jour couvert (payé le 29/09 → 28/10)
   montant: number;
   datePaiement?: string;
   statut?: StatutPaiement;
@@ -85,15 +89,33 @@ export interface TicketVenteResponse {
   modePaiement: string;
   dateValidite: string;
   nomClient?: string;
+  telephoneClient: string;   // format international sans « + » (ex. 221771234567)
+  lienTicket: string;        // page publique /t/{token} avec le QR
+  lienWhatsApp: string;      // lien wa.me avec message pré-rempli
 }
 
 export interface ScanResponse {
   autorise: boolean;
   type?: 'MEMBRE' | 'TICKET';
-  motif?: string;
-  membre?: Membre;
-  ticket?: TicketEntree;
-  site?: Site;
+  motifRefus?: string;
+  nom?: string;
+  prenom?: string;
+  numero?: string;        // numeroCarte ou numeroTicket
+  siteNom?: string;
+  heureEntree?: string;   // ISO instant
+  planNom?: string;       // pour les membres
+  dateValidite?: string;  // pour les tickets
+}
+
+export interface PointageMembre {
+  id: number;
+  heureEntree: string;
+  heureSortie?: string;
+  statut: 'AUTORISE' | 'REFUSE';
+  motifRefus?: string;
+  typeAcces?: 'MEMBRE' | 'TICKET';
+  scanSource?: 'TABLETTE' | 'MANUEL' | 'APP';
+  siteNom?: string;
 }
 
 export interface DashboardStats {
@@ -118,6 +140,60 @@ export interface AppUser {
   email?: string;
   nom?: string;
   prenom?: string;
-  role?: string;
+  roles?: string[];
   actif?: boolean;
+}
+
+// ── Gérants ──────────────────────────────────────────────────────────────────
+
+export interface GerantSiteAssignment {
+  id: number;
+  siteId: number;
+  siteNom: string;
+  heureDebut: string;   // "HH:mm:ss" depuis le backend
+  heureFin: string;
+  actif: boolean;
+}
+
+export interface CurrentUser {
+  id: number;
+  username: string;
+  email?: string;
+  nom?: string;
+  prenom?: string;
+  roles: string[];
+  siteAssignments: GerantSiteAssignment[];
+}
+
+export interface Gerant {
+  id?: number;
+  userId?: number;
+  username: string;
+  email?: string;
+  nom: string;
+  prenom: string;
+  siteId: number;
+  siteNom?: string;
+  heureDebut: string;
+  heureFin: string;
+  actif?: boolean;
+}
+
+export interface GerantStats {
+  gerantId: number;
+  nom: string;
+  prenom: string;
+  username: string;
+  siteId: number;
+  siteNom: string;
+  heureDebut: string;
+  heureFin: string;
+  nbMensualitesEnregistrees: number;
+  caMensualites: number;
+  nbTicketsVendus: number;
+  caTickets: number;
+  caTotal: number;
+  membresActifsSite: number;
+  membresPayesCeMois: number;
+  tauxRecouvrement: number;
 }
