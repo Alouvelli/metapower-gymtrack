@@ -16,6 +16,7 @@ avec Docker, HTTPS automatique (Caddy + Let's Encrypt) et base PostgreSQL non ex
 
 ```bash
 sudo apt update && sudo apt install -y docker.io docker-compose-v2 git
+docker compose version          # doit afficher 2.24 ou plus (sinon : docs.docker.com/engine/install/ubuntu)
 sudo usermod -aG docker $USER   # puis se déconnecter / reconnecter
 sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw --force enable
 sudo git clone https://github.com/Alouvelli/metapower-gymtrack.git /opt/gymtrack
