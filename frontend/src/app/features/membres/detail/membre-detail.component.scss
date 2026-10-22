@@ -450,8 +450,12 @@
   text-transform: none; }
 .cp-social span { display: inline-flex;
   align-items: center;
-  gap: 4px; }
+  gap: 4px;
+  white-space: nowrap; }
 .cp-social i { font-size: 10px; }
+/* Contacts de la salle sur toute la largeur du pied */
+.cp-footer .cp-social { width: 100%;
+  justify-content: space-between; }
 .pointage-count { font-size: 13px;
   color: var(--text-muted);
   display: flex;

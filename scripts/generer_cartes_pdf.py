@@ -115,7 +115,7 @@ def carte_html(m, logo, qr):
     </div>
     <div class="cp-qr-section"><div class="cp-qr-wrap"><img src="data:image/png;base64,{qr}" alt="QR" class="cp-qr"></div></div>
   </div>
-  <div class="cp-footer"><div class="cp-social"><span><i class="fab fa-instagram"></i>meta_power_gym</span><span><i class="fab fa-tiktok"></i>coach_mola</span></div><span>Réseau multisite</span></div>
+  <div class="cp-footer"><div class="cp-social"><span><i class="fab fa-instagram"></i>meta_power_gym</span><span><i class="fab fa-tiktok"></i>coach_mola</span><span><i class="fas fa-phone-volume"></i>77 300 02 74 · 71 013 07 24</span></div></div>
 </div>'''
 
 
