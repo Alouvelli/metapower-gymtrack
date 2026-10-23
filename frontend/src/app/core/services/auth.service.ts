@@ -91,6 +91,12 @@ export class AuthService {
     );
   }
 
+  /** Change le mot de passe de l'utilisateur connecté (le mot de passe actuel est exigé). */
+  changerMotDePasse(motDePasseActuel: string, nouveauMotDePasse: string): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/api/users/me/password`,
+      { motDePasseActuel, nouveauMotDePasse });
+  }
+
   /** Valeur synchrone du cache (null si pas encore chargé). */
   get currentUser(): CurrentUser | null {
     return this.currentUserSubject.value;

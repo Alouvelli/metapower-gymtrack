@@ -188,6 +188,44 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   closeThemeModal(): void { this.isThemeModalOpen = false; }
 
+  /* ── Changement de mot de passe ─────────────────── */
+  isPasswordModalOpen = false;
+  pwd = { actuel: '', nouveau: '', confirmation: '' };
+  pwdErreur = '';
+  pwdSucces = false;
+  pwdEnCours = false;
+
+  openPasswordModal(): void {
+    this.isProfileMenuOpen = false;
+    this.pwd = { actuel: '', nouveau: '', confirmation: '' };
+    this.pwdErreur = '';
+    this.pwdSucces = false;
+    this.isPasswordModalOpen = true;
+  }
+
+  closePasswordModal(): void { this.isPasswordModalOpen = false; }
+
+  changerMotDePasse(): void {
+    this.pwdErreur = '';
+    if (!this.pwd.actuel || !this.pwd.nouveau) { this.pwdErreur = 'Tous les champs sont obligatoires.'; return; }
+    if (this.pwd.nouveau.length < 8) { this.pwdErreur = 'Le nouveau mot de passe doit contenir au moins 8 caractères.'; return; }
+    if (this.pwd.nouveau !== this.pwd.confirmation) { this.pwdErreur = 'La confirmation ne correspond pas au nouveau mot de passe.'; return; }
+    this.pwdEnCours = true;
+    this.auth.changerMotDePasse(this.pwd.actuel, this.pwd.nouveau).subscribe({
+      next: () => {
+        this.pwdEnCours = false;
+        this.pwdSucces = true;
+        this.pwd = { actuel: '', nouveau: '', confirmation: '' };
+        setTimeout(() => this.closePasswordModal(), 1800);
+      },
+      error: err => {
+        this.pwdEnCours = false;
+        const champs = err?.error?.fields ? Object.values(err.error.fields).join(' ') : '';
+        this.pwdErreur = err?.error?.message || champs || 'Erreur lors du changement de mot de passe.';
+      }
+    });
+  }
+
   /* ════════════════ FULLSCREEN ══════════════════════ */
 
   toggleFullscreen(): void {
