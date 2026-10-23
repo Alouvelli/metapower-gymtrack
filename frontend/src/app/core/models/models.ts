@@ -35,7 +35,7 @@ export interface Membre {
 }
 
 export type ModePaiement = 'ESPECES' | 'WAVE' | 'ORANGE_MONEY' | 'CARTE' | 'VIREMENT';
-export type StatutPaiement = 'PAYE' | 'EN_ATTENTE' | 'EN_RETARD';
+export type StatutPaiement = 'PAYE' | 'EN_ATTENTE' | 'EN_RETARD' | 'ANNULE';
 
 export interface Mensualite {
   id?: number;
@@ -51,6 +51,8 @@ export interface Mensualite {
   statut?: StatutPaiement;
   modePaiement?: ModePaiement;
   reference?: string;
+  annuleLe?: string;          // annulation par un admin (statut ANNULE)
+  motifAnnulation?: string;
 }
 
 export interface TarifTicket {

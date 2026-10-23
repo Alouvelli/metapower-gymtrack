@@ -15,6 +15,8 @@ public interface MensualiteRepository extends JpaRepository<Mensualite, Long> {
     Optional<Mensualite> findFirstByMembreAndMoisConcerne(Membre membre, LocalDate moisConcerne);
     List<Mensualite> findByMembre(Membre membre);
     List<Mensualite> findByDatePaiementBetween(LocalDate from, LocalDate to);
+    /** Paiements de la période hors annulés (rapports PDF / Excel). */
+    List<Mensualite> findByDatePaiementBetweenAndStatutNot(LocalDate from, LocalDate to, StatutPaiement statut);
 
     @Query("SELECT COALESCE(SUM(m.montant), 0) FROM Mensualite m " +
            "WHERE m.statut = :statut AND m.datePaiement BETWEEN :from AND :to")
@@ -66,6 +68,7 @@ public interface MensualiteRepository extends JpaRepository<Mensualite, Long> {
 
     @Query("SELECT COUNT(m) FROM Mensualite m " +
            "WHERE m.enregistrePar.id = :userId " +
+           "AND m.statut <> sn.metapower.gymtrack.entities.StatutPaiement.ANNULE " +
            "AND m.datePaiement BETWEEN :from AND :to")
     long countByUserAndPeriod(@Param("userId") Long userId,
                               @Param("from") LocalDate from,

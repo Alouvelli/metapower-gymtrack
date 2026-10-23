@@ -19,6 +19,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import sn.metapower.gymtrack.entities.Mensualite;
+import sn.metapower.gymtrack.entities.StatutPaiement;
 import sn.metapower.gymtrack.entities.Site;
 import sn.metapower.gymtrack.entities.TicketEntree;
 import sn.metapower.gymtrack.exceptions.RessourceNotFoundException;
@@ -57,7 +58,7 @@ public class RapportService {
     public byte[] mensualitesExcel(LocalDate mois) {
         LocalDate from = mois.withDayOfMonth(1);
         LocalDate to = from.plusMonths(1).minusDays(1);
-        List<Mensualite> data = mensualiteRepository.findByDatePaiementBetween(from, to);
+        List<Mensualite> data = mensualiteRepository.findByDatePaiementBetweenAndStatutNot(from, to, StatutPaiement.ANNULE);
 
         try (Workbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = wb.createSheet("Mensualités " + from);
@@ -170,7 +171,7 @@ public class RapportService {
     public byte[] mensualitesPdf(LocalDate mois) {
         LocalDate from = mois.withDayOfMonth(1);
         LocalDate to = from.plusMonths(1).minusDays(1);
-        List<Mensualite> data = mensualiteRepository.findByDatePaiementBetween(from, to);
+        List<Mensualite> data = mensualiteRepository.findByDatePaiementBetweenAndStatutNot(from, to, StatutPaiement.ANNULE);
 
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();

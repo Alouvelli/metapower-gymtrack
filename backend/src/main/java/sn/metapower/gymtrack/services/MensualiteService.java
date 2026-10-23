@@ -37,7 +37,9 @@ public class MensualiteService {
 
     @Transactional
     public Mensualite enregistrerPaiement(MensualiteCreateRequest req) {
-        Membre membre = membreRepository.findById(req.membreId())
+        // Verrou sur le membre : un double clic (2 requêtes simultanées) ne crée plus deux
+        // paiements identiques — la 2e attend la 1re puis est refusée (période déjà payée).
+        Membre membre = membreRepository.findByIdForUpdate(req.membreId())
                 .orElseThrow(() -> new RessourceNotFoundException("Membre introuvable : " + req.membreId()));
 
         LocalDate datePaiement = req.datePaiement() != null ? req.datePaiement() : LocalDate.now();
@@ -88,6 +90,25 @@ public class MensualiteService {
         }
 
         return mensualiteRepository.save(mensualite);
+    }
+
+    /**
+     * Annulation d'un paiement saisi par erreur (réservé à l'admin, cf. contrôleur).
+     * Le paiement est conservé avec le statut ANNULE et la trace de l'annulation ;
+     * il ne compte plus pour l'accès, le chiffre d'affaires ni les rapports.
+     */
+    @Transactional
+    public Mensualite annuler(Long id, String motif, String username) {
+        Mensualite m = mensualiteRepository.findById(id)
+                .orElseThrow(() -> new RessourceNotFoundException("Paiement introuvable : " + id));
+        if (m.getStatut() == StatutPaiement.ANNULE) {
+            throw new BusinessException("Ce paiement est déjà annulé");
+        }
+        m.setStatut(StatutPaiement.ANNULE);
+        m.setAnnuleLe(java.time.Instant.now());
+        m.setAnnulePar(userRepository.findByUsername(username));
+        m.setMotifAnnulation(motif.trim());
+        return mensualiteRepository.save(m);
     }
 
     public List<Mensualite> findByMembre(Long membreId) {

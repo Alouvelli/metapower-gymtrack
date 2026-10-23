@@ -69,6 +69,17 @@ public class Mensualite {
     @JoinColumn(name = "enregistre_par_id")
     private AppUser enregistrePar;
 
+    /** Annulation (statut ANNULE) : quand, par qui, pourquoi. */
+    @Column(name = "annule_le")
+    private Instant annuleLe;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "annule_par_id")
+    private AppUser annulePar;
+
+    @Column(name = "motif_annulation", length = 255)
+    private String motifAnnulation;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 }

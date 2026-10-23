@@ -3,6 +3,8 @@ package sn.metapower.gymtrack.controllers;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import sn.metapower.gymtrack.dto.AnnulationPaiementRequest;
 import sn.metapower.gymtrack.dto.MensualiteCreateRequest;
 import sn.metapower.gymtrack.entities.AppUser;
 import sn.metapower.gymtrack.entities.Mensualite;
@@ -51,5 +53,14 @@ public class MensualiteController {
     @PostMapping
     public Mensualite enregistrer(@Valid @RequestBody MensualiteCreateRequest request) {
         return mensualiteService.enregistrerPaiement(request);
+    }
+
+    /** Annule un paiement saisi par erreur (admin uniquement ; motif obligatoire, trace conservée). */
+    @PostMapping("/{id}/annuler")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public Mensualite annuler(@PathVariable Long id,
+                              @Valid @RequestBody AnnulationPaiementRequest request,
+                              Authentication authentication) {
+        return mensualiteService.annuler(id, request.motif(), authentication.getName());
     }
 }
