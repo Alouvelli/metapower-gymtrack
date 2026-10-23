@@ -45,7 +45,8 @@ export class ScannerComponent implements OnInit, AfterViewInit {
     this.deviceKey = localStorage.getItem(DEVICE_KEY_STORAGE) || '';
     const sid = localStorage.getItem(SITE_KEY);
     if (sid) this.siteId = Number(sid);
-    this.siteSvc.liste().subscribe({
+    // La tablette n'a pas de session : liste publique (sinon 401 et liste vide)
+    this.siteSvc.listePublique().subscribe({
       next: s => this.sites = s,
       error: () => this.configMode = true
     });

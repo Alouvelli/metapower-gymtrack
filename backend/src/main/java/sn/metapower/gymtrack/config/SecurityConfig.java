@@ -88,6 +88,8 @@ public class SecurityConfig {
                         // Ticket public (page WhatsApp du client, QR, reçu PDF) — par token UUID,
                         // jamais par id séquentiel (sinon on récupère les QR valides des autres)
                         .requestMatchers(HttpMethod.GET, "/api/public/tickets/**").permitAll()
+                        // Salles actives (id + nom) pour configurer le scanner tablette sans session
+                        .requestMatchers(HttpMethod.GET, "/api/public/sites").permitAll()
                         // QR code membres — chargé via <img src> (pas de JWT possible)
                         .requestMatchers("/api/membres/*/qrcode").permitAll()
                         // Tout le reste : JWT requis
