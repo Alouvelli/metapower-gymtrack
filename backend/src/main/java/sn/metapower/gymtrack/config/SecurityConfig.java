@@ -82,7 +82,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         // Endpoint scan QR — DeviceAccessKeyFilter doit avoir injecté ROLE_DEVICE
                         // (via header X-Device-Key). Sans la clé valide, accès refusé.
-                        .requestMatchers("/api/pointages/scan").hasAuthority("ROLE_DEVICE")
+                        .requestMatchers("/api/pointages/scan", "/api/pointages/device/verifier").hasAuthority("ROLE_DEVICE")
                         // Photos membres et reçus tickets en lecture publique
                         .requestMatchers("/files/view/**", "/files/download/**").permitAll()
                         // Ticket public (page WhatsApp du client, QR, reçu PDF) — par token UUID,

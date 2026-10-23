@@ -17,6 +17,11 @@ export class PointageService {
     );
   }
 
+  /** Vérifie la clé de la tablette (erreur 401 si elle est fausse). */
+  verifierCleDevice(deviceKey: string): Observable<{ valide: boolean }> {
+    return this.http.get<{ valide: boolean }>(`${this.base}/device/verifier`, { headers: { 'X-Device-Key': deviceKey } });
+  }
+
   jour(siteId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/site/${siteId}/jour`);
   }

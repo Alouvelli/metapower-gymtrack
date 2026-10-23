@@ -27,6 +27,8 @@ public class DeviceAccessKeyFilter extends OncePerRequestFilter {
     public static final String HEADER = "X-Device-Key";
     public static final String DEVICE_AUTHORITY = "ROLE_DEVICE";
     public static final String SCAN_PATH = "/api/pointages/scan";
+    /** Vérification de la clé par l'écran de configuration de la tablette. */
+    public static final String VERIF_PATH = "/api/pointages/device/verifier";
 
     @Value("${app.device-access-key}")
     private String configuredKey;
@@ -36,9 +38,10 @@ public class DeviceAccessKeyFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        if (SCAN_PATH.equals(request.getRequestURI())) {
+        String uri = request.getRequestURI();
+        if (SCAN_PATH.equals(uri) || VERIF_PATH.equals(uri)) {
             String provided = request.getHeader(HEADER);
-            if (provided != null && provided.equals(configuredKey)) {
+            if (provided != null && configuredKey != null && provided.trim().equals(configuredKey.trim())) {
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 "device", null,

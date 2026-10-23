@@ -19,6 +19,8 @@ export class AppHttpInterceptor implements HttpInterceptor {
     '/auth/forgot-password',
     '/auth/reset-password',
     '/api/pointages/scan',  // utilise X-Device-Key
+    '/api/pointages/device/',  // vérification de la clé tablette
+    '/api/public/',            // pages publiques (ticket client, salles du scanner)
     '/files/view/',
     '/files/download/'
   ];

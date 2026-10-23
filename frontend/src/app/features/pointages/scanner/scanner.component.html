@@ -26,12 +26,15 @@
 
       <mat-form-field appearance="outline" class="full">
         <mat-label>Clé d'accès device</mat-label>
-        <input matInput type="password" [(ngModel)]="deviceKey">
+        <!-- En clair : on voit ce qu'on a collé (la clé n'est pas un mot de passe utilisateur) -->
+        <input matInput type="text" [(ngModel)]="deviceKey" autocomplete="off" autocapitalize="off" spellcheck="false">
       </mat-form-field>
 
+      <p class="config-erreur" *ngIf="configErreur">{{ configErreur }}</p>
+
       <button mat-flat-button color="primary" class="full" (click)="sauverConfig()"
-              [disabled]="!siteId || !deviceKey">
-        Démarrer le scanner
+              [disabled]="!siteId || !deviceKey || verificationEnCours">
+        {{ verificationEnCours ? 'Vérification de la clé…' : 'Démarrer le scanner' }}
       </button>
     </mat-card>
   </div>

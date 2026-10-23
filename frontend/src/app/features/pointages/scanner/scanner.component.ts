@@ -116,11 +116,30 @@ export class ScannerComponent implements OnInit, AfterViewInit {
     s.hints = hints;
   }
 
+  configErreur = '';
+  verificationEnCours = false;
+
+  /** Vérifie la clé auprès du serveur avant de démarrer : une clé fausse ne passe plus inaperçue. */
   sauverConfig() {
-    if (this.siteId) localStorage.setItem(SITE_KEY, String(this.siteId));
-    localStorage.setItem(DEVICE_KEY_STORAGE, this.deviceKey);
-    this.configMode = false;
-    setTimeout(() => this.applyZxingOptions(), 300);
+    this.deviceKey = (this.deviceKey || '').trim();
+    this.configErreur = '';
+    if (!this.siteId || !this.deviceKey) { this.configErreur = 'Choisissez la salle et saisissez la clé d\'accès.'; return; }
+    this.verificationEnCours = true;
+    this.pointageSvc.verifierCleDevice(this.deviceKey).subscribe({
+      next: () => {
+        this.verificationEnCours = false;
+        localStorage.setItem(SITE_KEY, String(this.siteId));
+        localStorage.setItem(DEVICE_KEY_STORAGE, this.deviceKey);
+        this.configMode = false;
+        setTimeout(() => this.applyZxingOptions(), 300);
+      },
+      error: err => {
+        this.verificationEnCours = false;
+        this.configErreur = (err?.status === 401 || err?.status === 403)
+          ? 'Clé d\'accès invalide. Vérifiez-la (sans espace) puis réessayez.'
+          : 'Serveur injoignable. Vérifiez la connexion internet de la tablette.';
+      }
+    });
   }
 
   onScan(qrToken: string) {
@@ -138,8 +157,11 @@ export class ScannerComponent implements OnInit, AfterViewInit {
         this.playFeedback(r.autorise);
         setTimeout(() => { this.result = undefined; this.scanning = true; }, 4000);
       },
-      error: () => {
-        this.result = { autorise: false, motifRefus: 'ERREUR_RESEAU' };
+      error: err => {
+        // Clé refusée : on le dit clairement et on revient à la configuration
+        const cleRefusee = err?.status === 401 || err?.status === 403;
+        this.result = { autorise: false, motifRefus: cleRefusee ? 'CLE_INVALIDE' : 'ERREUR_RESEAU' };
+        if (cleRefusee) { setTimeout(() => { this.configMode = true; this.configErreur = 'La clé enregistrée sur cette tablette est refusée : saisissez-la à nouveau.'; }, 2500); }
         this.playFeedback(false);
         setTimeout(() => { this.result = undefined; this.scanning = true; }, 3000);
       }
@@ -155,7 +177,8 @@ export class ScannerComponent implements OnInit, AfterViewInit {
       'TICKET_EXPIRE':       'Ticket expiré',
       'QR_INVALIDE':         'QR code non reconnu',
       'DOUBLON_RECENT':      'Scan trop récent, patientez',
-      'ERREUR_RESEAU':       'Erreur réseau'
+      'ERREUR_RESEAU':       'Erreur réseau — vérifiez internet',
+      'CLE_INVALIDE':        'Clé tablette invalide — reconfigurez'
     };
     return labels[code ?? ''] ?? code ?? 'Accès refusé';
   }

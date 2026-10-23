@@ -36,6 +36,12 @@ public class PointageController {
     /**
      * Endpoint public pour les tablettes — protégé par DeviceAccessKeyFilter (X-Device-Key).
      */
+    /** Permet à la tablette de vérifier sa clé avant de démarrer (200 si valide, 401 sinon). */
+    @GetMapping("/device/verifier")
+    public java.util.Map<String, Boolean> verifierCleDevice() {
+        return java.util.Map.of("valide", true);
+    }
+
     @PostMapping("/scan")
     public ScanResponse scan(@Valid @RequestBody ScanRequest request) {
         return pointageService.scan(request);
