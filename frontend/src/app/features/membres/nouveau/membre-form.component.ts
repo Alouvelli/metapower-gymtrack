@@ -59,9 +59,11 @@ export class MembreFormComponent implements OnInit {
         this.snack.open('Membre enregistré', 'OK', { duration: 2500 });
         this.router.navigate(['/membres', m.id]);
       },
-      error: () => {
+      error: err => {
         this.loading = false;
-        this.snack.open('Erreur d\'enregistrement', 'OK', { duration: 3000 });
+        // Affiche la raison donnée par le serveur (téléphone déjà utilisé, email invalide…)
+        const champs = err?.error?.fields ? Object.values(err.error.fields).join(' ') : '';
+        this.snack.open(err?.error?.message || champs || 'Erreur d\'enregistrement', 'OK', { duration: 5000 });
       }
     });
   }

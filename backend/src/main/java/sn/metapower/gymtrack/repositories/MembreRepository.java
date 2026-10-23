@@ -12,6 +12,8 @@ public interface MembreRepository extends JpaRepository<Membre, Long> {
     Optional<Membre> findByNumeroCarte(String numeroCarte);
     boolean existsByEmail(String email);
     boolean existsByTelephone(String telephone);
+    boolean existsByEmailAndIdNot(String email, Long id);
+    boolean existsByTelephoneAndIdNot(String telephone, Long id);
     long countByNumeroCarteStartingWith(String prefix);
 
     /** Plus grand numéro de la série « MBR-NNNN » (0 si aucun). Ignore les anciens « MBR-2026-NNNN ». */

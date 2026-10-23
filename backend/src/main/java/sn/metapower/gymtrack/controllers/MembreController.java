@@ -40,6 +40,12 @@ public class MembreController {
         return ResponseEntity.ok(MembreResponse.from(created));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<MembreResponse> update(@PathVariable Long id,
+                                                 @Valid @RequestBody MembreCreateRequest request) {
+        return ResponseEntity.ok(MembreResponse.from(membreService.update(id, request)));
+    }
+
     @GetMapping(value = "/{id}/qrcode", produces = MediaType.IMAGE_PNG_VALUE)
     public byte[] qrCode(@PathVariable Long id) {
         return membreService.generateQrCodePng(id);

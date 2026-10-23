@@ -30,7 +30,8 @@ public class MembreService {
 
     @Transactional
     public Membre create(MembreCreateRequest req) {
-        if (req.email() != null && membreRepository.existsByEmail(req.email())) {
+        String email = emailOuNull(req.email());
+        if (email != null && membreRepository.existsByEmail(email)) {
             throw new BusinessException("Un membre avec cet email existe déjà");
         }
         if (membreRepository.existsByTelephone(req.telephone())) {
@@ -38,22 +39,54 @@ public class MembreService {
         }
 
         Membre m = new Membre();
-        m.setNom(req.nom());
-        m.setPrenom(req.prenom());
-        m.setTelephone(req.telephone());
-        m.setEmail(req.email());
-        m.setDateNaissance(req.dateNaissance());
-        m.setAdresse(req.adresse());
         m.setQrCodeToken(UUID.randomUUID().toString());
         m.setStatut(StatutMembre.ACTIF);
         m.setNumeroCarte(generateNumeroCarte());
+        appliquer(m, req, email);
+        return membreRepository.save(m);
+    }
 
+    /** Modification d'un membre (numéro de carte, QR et statut inchangés). */
+    @Transactional
+    public Membre update(Long id, MembreCreateRequest req) {
+        Membre m = findById(id);
+        String email = emailOuNull(req.email());
+        // Contrôles d'unicité seulement si la valeur change : des membres importés du
+        // registre papier partagent un téléphone (famille) et doivent rester modifiables.
+        if (email != null && !email.equals(m.getEmail()) && membreRepository.existsByEmailAndIdNot(email, id)) {
+            throw new BusinessException("Un autre membre a déjà cet email");
+        }
+        String tel = req.telephone().trim();
+        if (!tel.equals(m.getTelephone()) && membreRepository.existsByTelephoneAndIdNot(tel, id)) {
+            throw new BusinessException("Un autre membre a déjà ce numéro de téléphone");
+        }
+        appliquer(m, req, email);
+        return membreRepository.save(m);
+    }
+
+    private void appliquer(Membre m, MembreCreateRequest req, String email) {
+        m.setNom(req.nom().trim());
+        m.setPrenom(req.prenom().trim());
+        m.setTelephone(req.telephone().trim());
+        m.setEmail(email);
+        m.setDateNaissance(req.dateNaissance());
+        m.setAdresse(req.adresse());
         if (req.planId() != null) {
             PlanAbonnement plan = planRepository.findById(req.planId())
                     .orElseThrow(() -> new RessourceNotFoundException("Plan introuvable : " + req.planId()));
             m.setPlan(plan);
+        } else {
+            m.setPlan(null);
         }
-        return membreRepository.save(m);
+    }
+
+    /**
+     * Email vide du formulaire → null. Sinon le contrôle d'unicité comparait des
+     * chaînes vides : le 1er membre sans email passait, tous les suivants étaient
+     * refusés (« Un membre avec cet email existe déjà »).
+     */
+    private static String emailOuNull(String email) {
+        return (email == null || email.isBlank()) ? null : email.trim().toLowerCase();
     }
 
     public Membre findById(Long id) {
