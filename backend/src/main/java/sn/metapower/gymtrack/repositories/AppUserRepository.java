@@ -7,6 +7,8 @@ import java.util.Optional;
 
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     AppUser findByUsername(String username);
+    /** Repli à la connexion : « Admin » (majuscule auto du téléphone) → admin. */
+    AppUser findFirstByUsernameIgnoreCase(String username);
     Optional<AppUser> findByEmail(String email);
     Optional<AppUser> findByResetPasswordToken(String token);
     boolean existsByUsername(String username);

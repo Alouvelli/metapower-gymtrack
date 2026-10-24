@@ -29,7 +29,11 @@ public class MyUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Authentification demandée pour : {}", username);
-        AppUser appUser = appUserRepository.findByUsername(username);
+        String saisi = username == null ? "" : username.trim();
+        AppUser appUser = appUserRepository.findByUsername(saisi);
+        if (appUser == null) {
+            appUser = appUserRepository.findFirstByUsernameIgnoreCase(saisi);
+        }
         if (appUser == null) {
             throw new UsernameNotFoundException("Utilisateur introuvable : " + username);
         }

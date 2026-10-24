@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -38,9 +39,19 @@ public class AuthController {
     @PostMapping("/login")
     public Map<String, String> login(@RequestParam String username, @RequestParam String password) {
         log.info("Tentative de connexion : {}", username);
+        String login = username.trim();
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password));
+        // Identifiants souvent copiés depuis WhatsApp / un mail : un espace parasite
+        // en fin de mot de passe ne doit pas bloquer la connexion.
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(login, password));
+        } catch (BadCredentialsException e) {
+            if (password.strip().equals(password)) throw e;
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(login, password.strip()));
+        }
 
         Instant now = Instant.now();
         String scope = authentication.getAuthorities().stream()
@@ -50,7 +61,7 @@ public class AuthController {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(now.plus(8, ChronoUnit.HOURS))
-                .subject(username)
+                .subject(authentication.getName())
                 .claim("scope", scope)
                 .build();
 
