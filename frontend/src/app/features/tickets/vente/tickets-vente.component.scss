@@ -1,6 +1,6 @@
 // Restauré depuis le cache de build Angular (version de mai 2026) — CSS compilé reconverti
 :host { display: block;
-  animation: fadeUp 0.4s var(--ease) both; }
+  animation: fadeUp 0.4s var(--ease) backwards; }
 .caisse { display: grid;
   grid-template-columns: 1.4fr 1fr;
   gap: 20px; }
@@ -151,4 +151,9 @@ h3::before { content: "";
   color: #fff;
   --mdc-filled-button-container-color: #25d366;
   --mdc-filled-button-label-text-color: #fff;
+}
+
+/* Téléphone : nom et WhatsApp l'un sous l'autre (côte à côte, les libellés étaient coupés) */
+@media (max-width: 600px) {
+  .row2 { display: grid !important; grid-template-columns: 1fr !important; gap: 0 !important; }
 }

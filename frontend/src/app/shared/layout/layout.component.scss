@@ -742,3 +742,26 @@
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+
+/* ═══════════════════════════════════════
+   TÉLÉPHONE (≤ 900 px) — menu en tiroir, contenu pleine largeur
+═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .topbar { padding: 0 10px; gap: 6px; }
+  .topbar-center { display: none; }                 // recherche : accessible par les menus
+  .topbar-sep { display: none; }
+  .profile-info, .chev { display: none !important; } // avatar seul
+  .content { padding: 12px; }
+}
+@media (max-width: 900px) {
+  .fullscreen-btn { display: none !important; }      // inutile sur téléphone
+}
+@media (max-width: 900px) {
+  // Le titre cède la place aux boutons : coupé avec « … » au lieu de pousser le profil hors écran
+  .topbar-left  { flex: 1 1 auto; min-width: 0; gap: 8px; }
+  .topbar-title { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-right { flex: 0 0 auto; gap: 4px; }
+  // Menu profil : reste dans l'écran
+  .profile-menu { right: 0; max-width: calc(100vw - 20px); }
+}

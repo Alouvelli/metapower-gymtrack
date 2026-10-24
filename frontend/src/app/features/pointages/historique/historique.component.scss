@@ -1,6 +1,6 @@
 // Restauré depuis le cache de build Angular (version de mai 2026) — CSS compilé reconverti
 :host { display: block;
-  animation: fadeUp 0.4s var(--ease) both; }
+  animation: fadeUp 0.4s var(--ease) backwards; }
 .historique-wrapper { background-color: var(--bg-page);
   background-image: radial-gradient(circle at 18% 8%, rgba(212, 160, 23, 0.05) 0%, transparent 45%), radial-gradient(circle at 82% 85%, rgba(139, 105, 0, 0.04) 0%, transparent 45%);
   min-height: 100%;

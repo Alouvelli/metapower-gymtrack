@@ -1,7 +1,11 @@
-<mat-sidenav-container class="layout" [class.sidebar-mini]="sidebarMini">
+<mat-sidenav-container class="layout" [class.sidebar-mini]="sidebarMini && !isMobile" [class.is-mobile]="isMobile">
 
   <!-- ══════════ SIDEBAR ══════════ -->
-  <mat-sidenav mode="side" opened class="sidebar">
+  <!-- Téléphone : tiroir par-dessus le contenu, fermé par défaut ; ordinateur : menu fixe -->
+  <mat-sidenav class="sidebar"
+               [mode]="isMobile ? 'over' : 'side'"
+               [opened]="!isMobile || mobileMenuOpen"
+               (openedChange)="isMobile && (mobileMenuOpen = $event)">
 
     <!-- Brand -->
     <div class="brand">
@@ -131,7 +135,7 @@
         </button>
 
         <!-- Plein écran -->
-        <button class="nav-btn"
+        <button class="nav-btn fullscreen-btn"
                 (click)="toggleFullscreen()"
                 [title]="isFullscreen ? 'Quitter plein écran' : 'Plein écran'">
           <i [class]="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>

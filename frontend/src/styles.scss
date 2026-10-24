@@ -105,7 +105,10 @@ body {
 /* Animations globales */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  /* « none » et non « translateY(0) » : avec animation-fill-mode both, une transformation
+     restait appliquée après l'animation ; les fenêtres en position: fixed se calaient alors
+     sur la page au lieu de l'écran (fenêtre de paiement décalée / qui défile sur téléphone) */
+  to   { opacity: 1; transform: none; }
 }
 @keyframes slideInLeft {
   from { opacity: 0; transform: translateX(-24px); }
@@ -657,4 +660,70 @@ body.theme-transition * { transition: background 0.35s ease, color 0.35s ease, b
 @media print {
   app-layout mat-sidenav, .topbar, .page-header button { display: none !important; }
   .content { padding: 0 !important; }
+}
+
+/* ═══════════════════════════════════════════════════
+   TÉLÉPHONE (≤ 900 px) — règles communes à tous les écrans
+   Les composants ont été conçus pour un ordinateur (marges de 24-36 px,
+   conteneurs « pleine largeur » en margin: -24px, tableaux larges).
+═══════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  /* Conteneurs pleine largeur : alignés sur le padding réduit de .content (12 px) */
+  .tarifs-wrapper, .tickets-wrapper, .rapports-wrapper, .gerants-wrapper,
+  .historique-wrapper, .mensualites-wrapper, .dashboard-wrapper, .sites-wrapper,
+  .membre-form-wrapper, .detail-wrapper, .membres-wrapper, .mt-wrapper, .params-wrapper {
+    margin: -12px !important;
+    padding-bottom: 32px !important;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Bandeaux : moins hauts, texte qui passe à la ligne */
+  .detail-hero, .form-hero, .gerants-hero, .historique-hero, .membres-hero, .mensualites-hero,
+  .mt-hero, .params-hero, .rapports-hero, .sites-hero, .tarifs-hero, .tickets-hero {
+    padding: 20px 16px 60px !important;
+    h1 { font-size: 20px !important; }
+    p  { font-size: 12.5px !important; }
+  }
+  .hero-content { flex-wrap: wrap !important; gap: 12px !important; }
+  .hero-left    { gap: 12px !important; min-width: 0; }
+  .hero-icon-wrap { width: 44px !important; height: 44px !important; font-size: 18px !important; }
+  .hero-stats {
+    display: flex !important; flex-wrap: wrap; gap: 10px 16px !important;
+    padding: 10px 14px !important; max-width: 100%; box-sizing: border-box;
+  }
+  .h-stat-sep { display: none !important; }
+
+  /* Corps de page : marges latérales réduites */
+  .detail-body, .form-body, .gerants-body, .historique-body, .membres-body, .mensualites-body,
+  .mt-body, .params-body, .rapports-body, .sites-body, .tarifs-body, .tickets-body {
+    padding-left: 12px !important; padding-right: 12px !important;
+  }
+
+  /* Tableaux : défilement horizontal DANS leur carte (la page, elle, ne déborde plus) */
+  .table-card, .app-table-card, .mat-mdc-card:has(> table.mat-mdc-table), div:has(> table.mat-mdc-table) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  table.mat-mdc-table {
+    .mat-mdc-header-cell, .mat-mdc-cell { padding: 0 10px !important; white-space: nowrap; }
+  }
+
+  /* Barres d'outils (recherche, filtres) : sur plusieurs lignes */
+  .table-toolbar, .toolbar, .filters, .page-header-content, .page-header-actions {
+    flex-wrap: wrap !important; gap: 10px !important;
+  }
+  .table-toolbar > *, .toolbar-right, .toolbar-left { min-width: 0; max-width: 100%; }
+  .table-toolbar input, .table-toolbar select, .search-box, .search-input { max-width: 100%; }
+
+  /* Onglets (fiche membre…) : défilent au lieu de déborder */
+  .tab-nav { overflow-x: auto !important; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn { flex-shrink: 0 !important; }
+
+  /* Grilles de cartes : une colonne */
+  .sites-grid, .tarifs-grid-cards, .kpi-grid, .stats-grid, .cards-grid { grid-template-columns: 1fr !important; }
+
+  /* Fenêtres (modales) : pleine largeur avec une petite marge */
+  .modal-box, .modal-card, .modal-content, .theme-modal { max-width: calc(100vw - 24px) !important; margin: 12px !important; }
 }

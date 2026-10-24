@@ -2,7 +2,7 @@ import {
   Component, OnInit, OnDestroy,
   Renderer2, HostListener, ViewChild, ElementRef
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Subject, fromEvent } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -64,6 +64,11 @@ export class LayoutComponent implements OnInit, OnDestroy {
   /* ── Sidebar ─────────────────────────────────────── */
   sidebarMini = false;
 
+  /* ── Téléphone : menu en tiroir (en dessous de 900 px) ── */
+  private readonly mobileQuery = window.matchMedia('(max-width: 900px)');
+  isMobile = this.mobileQuery.matches;
+  mobileMenuOpen = false;
+
   /* ── Dark mode ───────────────────────────────────── */
   isDarkMode = false;
 
@@ -106,6 +111,18 @@ export class LayoutComponent implements OnInit, OnDestroy {
       this.auth.getCurrentUser().pipe(takeUntil(this.destroy$)).subscribe();
     }
     this.initSidebarState();
+    // Bascule ordinateur / téléphone quand la largeur change (rotation, redimensionnement)
+    const surChangement = (e: MediaQueryListEvent) => {
+      this.isMobile = e.matches;
+      this.mobileMenuOpen = false;
+      this.applyContentMargin(false);
+    };
+    this.mobileQuery.addEventListener('change', surChangement);
+    this.destroy$.subscribe(() => this.mobileQuery.removeEventListener('change', surChangement));
+    // Sur téléphone, le tiroir se referme après avoir choisi une page
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe(ev => {
+      if (ev instanceof NavigationEnd && this.isMobile) this.mobileMenuOpen = false;
+    });
     this.initDarkMode();
     this.setupKeyboardShortcuts();
   }
@@ -138,13 +155,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
   /* ════════════════ SIDEBAR ══════════════════════════ */
 
   private initSidebarState(): void {
-    if (localStorage.getItem('sidebarMini') === 'true') {
-      this.sidebarMini = true;
-      this.applyContentMargin(false);
-    }
+    if (localStorage.getItem('sidebarMini') === 'true') this.sidebarMini = true;
+    if (this.sidebarMini || this.isMobile) this.applyContentMargin(false);
   }
 
   toggleSidebar(): void {
+    if (this.isMobile) { this.mobileMenuOpen = !this.mobileMenuOpen; return; }
     this.sidebarMini = !this.sidebarMini;
     localStorage.setItem('sidebarMini', String(this.sidebarMini));
     this.applyContentMargin(true);
@@ -155,7 +171,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
       const el = this.elRef.nativeElement.querySelector('mat-sidenav-content');
       if (!el) return;
       el.style.transition = animate ? 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)' : 'none';
-      el.style.marginLeft  = this.sidebarMini ? '68px' : '240px';
+      el.style.marginLeft  = this.isMobile ? '0' : (this.sidebarMini ? '68px' : '240px');
     });
   }
 
