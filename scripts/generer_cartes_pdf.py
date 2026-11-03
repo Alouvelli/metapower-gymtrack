@@ -7,7 +7,10 @@ Deux fichiers dans data/cartes/ (données personnelles : dossier ignoré par git
   cartes_format_CB.pdf  format carte bancaire 85,6 × 54 mm, 10 par A4 avec traits de coupe
 
 Sélection : membres présents sur les feuilles de paiement (data/import-membres/paiements.csv)
-+ tous les membres dont le numéro de carte est ≥ 500 ; ou seulement --numeros 103,156,…
++ tous les membres dont le numéro de carte est ≥ 500 ; ou seulement --numeros 103,156,… ; ou --tous
+
+--ssh ubuntu@IP : lit les membres dans la base de production (via SSH) au lieu de la base locale ;
+à combiner avec --api https://app.metapowergym.com pour les QR.
 
 --jpeg : en plus, une image JPEG haute définition par carte dans data/cartes/jpeg/
 (MBR-0103_NIANG_Codou.jpg…), pour l'imprimeur ou l'envoi par WhatsApp.
@@ -20,7 +23,7 @@ Sources :
 Usage :
   (cd frontend && npx ng build --configuration production)   # si dist/ absent
   python3 scripts/generer_cartes_pdf.py [--api http://localhost:4200] [--conteneur gymtrack_db]
-                                       [--numeros 103,156] [--jpeg]
+                                       [--numeros 103,156 | --tous] [--jpeg] [--ssh ubuntu@IP]
 """
 import argparse
 import base64
@@ -52,12 +55,14 @@ def numeros_feuilles():
         return {int(r['numero']) for r in csv.DictReader(f, delimiter=';') if r['numero'].strip()}
 
 
-def membres(conteneur):
+def membres(conteneur, ssh=None):
     req = ("SELECT m.id, m.numero_carte, m.nom, m.prenom, m.telephone, COALESCE(p.nom, '') "
            "FROM membre m LEFT JOIN plan_abonnement p ON p.id = m.plan_id "
            "WHERE m.numero_carte ~ '^MBR-[0-9]+$' ORDER BY m.numero_carte")
-    out = subprocess.run(['docker', 'exec', conteneur, 'psql', '-U', 'gymtrack', '-d', 'gymtrack_db',
-                          '-tA', '-F', '\t', '-c', req], check=True, capture_output=True, text=True).stdout
+    cmd = ['docker', 'exec', '-i', conteneur, 'sh', '-c', 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tA -F "\t"']
+    if ssh:
+        cmd = ['ssh', ssh, ' '.join(f"'{c}'" for c in cmd)]
+    out = subprocess.run(cmd, input=req + ';', check=True, capture_output=True, text=True).stdout
     res = []
     for ligne in out.splitlines():
         i, num, nom, prenom, tel, plan = ligne.split('\t')
@@ -212,11 +217,15 @@ def main():
     ap.add_argument('--api', default='http://localhost:4200')
     ap.add_argument('--conteneur', default='gymtrack_db')
     ap.add_argument('--numeros', help='seulement ces numéros de carte, ex. 103,156,210')
+    ap.add_argument('--tous', action='store_true', help='toutes les cartes de la base')
+    ap.add_argument('--ssh', help='lire la base de production via SSH, ex. ubuntu@37.187.55.148')
     ap.add_argument('--jpeg', action='store_true', help='aussi un JPEG par carte dans data/cartes/jpeg/')
     a = ap.parse_args()
 
-    tous = membres(a.conteneur)
-    if a.numeros:
+    tous = membres(a.conteneur, a.ssh)
+    if a.tous:
+        feuilles, choisis = set(), tous
+    elif a.numeros:
         feuilles = {int(x) for x in a.numeros.split(',') if x.strip()}
         choisis = [m for m in tous if m['n'] in feuilles]
     else:
@@ -246,9 +255,11 @@ def main():
     if a.jpeg:
         dossier = SORTIE / 'jpeg'
         dossier.mkdir(exist_ok=True)
-        for m, c in zip(choisis, cartes):
-            nom = re.sub(r'[^A-Za-z0-9]+', '_', unicodedata.normalize('NFKD', f'{m["nom"]}_{m["prenom"]}').encode('ascii', 'ignore').decode()).strip('_')
-            jpeg(c, base, dossier / f'{m["numero"]}_{nom}.jpg')
+        def fichier(m):
+            nom = unicodedata.normalize('NFKD', f'{m["nom"]}_{m["prenom"]}').encode('ascii', 'ignore').decode()
+            return dossier / f'{m["numero"]}_{re.sub(r"[^A-Za-z0-9]+", "_", nom).strip("_")}.jpg'
+        with ThreadPoolExecutor(4) as ex:
+            list(ex.map(lambda mc: jpeg(mc[1], base, fichier(mc[0])), zip(choisis, cartes)))
         print(f'→ {dossier}/ ({len(choisis)} JPEG)', file=sys.stderr)
 
 
