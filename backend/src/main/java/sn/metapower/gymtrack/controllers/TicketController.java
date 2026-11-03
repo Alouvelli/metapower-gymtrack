@@ -1,5 +1,6 @@
 package sn.metapower.gymtrack.controllers;
 
+import org.springframework.data.domain.Sort;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -54,9 +55,9 @@ public class TicketController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_GERANT"));
         if (isGerant) {
             AppUser user = userRepository.findByUsername(authentication.getName());
-            return ticketRepository.findByVendeurId(user.getId());
+            return ticketRepository.findByVendeurIdOrderByDatePaiementDescIdDesc(user.getId());
         }
-        return ticketRepository.findAll();
+        return ticketRepository.findAll(Sort.by(Sort.Direction.DESC, "datePaiement", "id"));
     }
 
     @GetMapping("/{id}")

@@ -7,7 +7,10 @@ Deux fichiers dans data/cartes/ (données personnelles : dossier ignoré par git
   cartes_format_CB.pdf  format carte bancaire 85,6 × 54 mm, 10 par A4 avec traits de coupe
 
 Sélection : membres présents sur les feuilles de paiement (data/import-membres/paiements.csv)
-+ tous les membres dont le numéro de carte est ≥ 500.
++ tous les membres dont le numéro de carte est ≥ 500 ; ou seulement --numeros 103,156,…
+
+--jpeg : en plus, une image JPEG haute définition par carte dans data/cartes/jpeg/
+(MBR-0103_NIANG_Codou.jpg…), pour l'imprimeur ou l'envoi par WhatsApp.
 
 Sources :
   - membres et jetons QR : base PostgreSQL (conteneur Docker)
@@ -17,6 +20,7 @@ Sources :
 Usage :
   (cd frontend && npx ng build --configuration production)   # si dist/ absent
   python3 scripts/generer_cartes_pdf.py [--api http://localhost:4200] [--conteneur gymtrack_db]
+                                       [--numeros 103,156] [--jpeg]
 """
 import argparse
 import base64
@@ -69,6 +73,8 @@ def css_carte():
     """Styles .cp-* du composant (le SCSS restauré est du CSS à plat)."""
     scss = (FRONT / 'src/app/features/membres/detail/membre-detail.component.scss').read_text(encoding='utf-8')
     scss = '\n'.join(l for l in scss.splitlines() if not l.lstrip().startswith('//'))
+    # sans les blocs @media (ex. carte réduite sur téléphone) : la carte imprimée garde sa taille
+    scss = re.sub(r'@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}', '', scss)
     regles = re.findall(r'([^{}]+)\{([^{}]*)\}', scss)
     return '\n'.join(f'{s.strip()} {{{b}}}' for s, b in regles if '.cp-' in s and ':host' not in s)
 
@@ -179,15 +185,42 @@ def imprimer(html, pdf):
                        check=True, capture_output=True, timeout=600)
 
 
+def jpeg(carte, base_css, fichier, echelle=4):
+    """Une carte 380 × 240 px rendue ×4 (1520 × 960 px), convertie en JPEG qualité 95."""
+    html = f'''<!doctype html><html lang="fr"><head><meta charset="utf-8">{POLICES}<style>
+* {{ box-sizing: border-box; }}
+html, body {{ margin: 0; width: 380px; height: 240px; overflow: hidden; background: #fff; font-family: Inter, sans-serif; }}
+.cp-card {{ box-shadow: none !important; border-radius: 0 !important; }}
+.cp-qr {{ image-rendering: pixelated; }}
+{base_css}
+</style></head><body>{carte}</body></html>'''
+    with tempfile.TemporaryDirectory() as tmp:
+        src, png = Path(tmp) / 'carte.html', Path(tmp) / 'carte.png'
+        src.write_text(html, encoding='utf-8')
+        subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars',
+                        f'--user-data-dir={tmp}/profil', '--virtual-time-budget=20000',
+                        '--window-size=380,240', f'--force-device-scale-factor={echelle}',
+                        f'--screenshot={png}', src.as_uri()],
+                       check=True, capture_output=True, timeout=120)
+        subprocess.run(['sips', '-s', 'format', 'jpeg', '-s', 'formatOptions', '95', str(png), '--out', str(fichier)],
+                       check=True, capture_output=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--api', default='http://localhost:4200')
     ap.add_argument('--conteneur', default='gymtrack_db')
+    ap.add_argument('--numeros', help='seulement ces numéros de carte, ex. 103,156,210')
+    ap.add_argument('--jpeg', action='store_true', help='aussi un JPEG par carte dans data/cartes/jpeg/')
     a = ap.parse_args()
 
-    feuilles = numeros_feuilles()
     tous = membres(a.conteneur)
-    choisis = [m for m in tous if m['n'] in feuilles or m['n'] >= NUMERO_MIN]
+    if a.numeros:
+        feuilles = {int(x) for x in a.numeros.split(',') if x.strip()}
+        choisis = [m for m in tous if m['n'] in feuilles]
+    else:
+        feuilles = numeros_feuilles()
+        choisis = [m for m in tous if m['n'] in feuilles or m['n'] >= NUMERO_MIN]
     absents = sorted(feuilles - {m['n'] for m in tous})
     print(f'{len(choisis)} cartes ({len(tous)} membres en base) — feuilles : {len(feuilles)}, ≥ {NUMERO_MIN} : '
           f'{sum(1 for m in tous if m["n"] >= NUMERO_MIN)}', file=sys.stderr)
@@ -208,6 +241,14 @@ def main():
         ''.join(f'{m["numero"]};{m["nom"]};{m["prenom"]};{m["tel"]};{m["plan"]}\n' for m in choisis),
         encoding='utf-8')
     print(f'→ {SORTIE}/cartes_A4.pdf, cartes_format_CB.pdf, liste_cartes.csv', file=sys.stderr)
+
+    if a.jpeg:
+        dossier = SORTIE / 'jpeg'
+        dossier.mkdir(exist_ok=True)
+        for m, c in zip(choisis, cartes):
+            nom = re.sub(r'[^A-Za-z0-9]+', '_', f'{m["nom"]}_{m["prenom"]}'.encode('ascii', 'ignore').decode()).strip('_')
+            jpeg(c, base, dossier / f'{m["numero"]}_{nom}.jpg')
+        print(f'→ {dossier}/ ({len(choisis)} JPEG)', file=sys.stderr)
 
 
 if __name__ == '__main__':

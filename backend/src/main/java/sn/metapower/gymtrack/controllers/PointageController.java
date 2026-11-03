@@ -1,5 +1,6 @@
 package sn.metapower.gymtrack.controllers;
 
+import org.springframework.data.domain.Sort;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import sn.metapower.gymtrack.dto.PointageMembreDto;
@@ -49,7 +50,7 @@ public class PointageController {
 
     @GetMapping
     public List<Pointage> findAll() {
-        return pointageRepository.findAll();
+        return pointageRepository.findAll(Sort.by(Sort.Direction.DESC, "heureEntree"));
     }
 
     /**
@@ -72,6 +73,6 @@ public class PointageController {
                 .orElseThrow(() -> new RessourceNotFoundException("Site introuvable : " + siteId));
         Instant from = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
         Instant to = LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
-        return pointageRepository.findBySiteAndHeureEntreeBetween(site, from, to);
+        return pointageRepository.findBySiteAndHeureEntreeBetweenOrderByHeureEntreeDesc(site, from, to);
     }
 }

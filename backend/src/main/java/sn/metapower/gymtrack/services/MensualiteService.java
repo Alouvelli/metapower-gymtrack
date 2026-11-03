@@ -114,7 +114,7 @@ public class MensualiteService {
     public List<Mensualite> findByMembre(Long membreId) {
         Membre membre = membreRepository.findById(membreId)
                 .orElseThrow(() -> new RessourceNotFoundException("Membre introuvable : " + membreId));
-        return mensualiteRepository.findByMembre(membre);
+        return mensualiteRepository.findByMembreOrderByDatePaiementDescIdDesc(membre);
     }
 
     /**

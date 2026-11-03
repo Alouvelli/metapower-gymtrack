@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface MensualiteRepository extends JpaRepository<Mensualite, Long> {
     Optional<Mensualite> findFirstByMembreAndMoisConcerne(Membre membre, LocalDate moisConcerne);
-    List<Mensualite> findByMembre(Membre membre);
+    List<Mensualite> findByMembreOrderByDatePaiementDescIdDesc(Membre membre);
     List<Mensualite> findByDatePaiementBetween(LocalDate from, LocalDate to);
     /** Paiements de la période hors annulés (rapports PDF / Excel). */
     List<Mensualite> findByDatePaiementBetweenAndStatutNot(LocalDate from, LocalDate to, StatutPaiement statut);
@@ -55,7 +55,7 @@ public interface MensualiteRepository extends JpaRepository<Mensualite, Long> {
 
     // ── Requêtes filtrées par gérant (enregistrePar) ──────────────────────────
 
-    List<Mensualite> findByEnregistreParId(Long userId);
+    List<Mensualite> findByEnregistreParIdOrderByDatePaiementDescIdDesc(Long userId);
 
     @Query("SELECT COALESCE(SUM(m.montant), 0) FROM Mensualite m " +
            "WHERE m.enregistrePar.id = :userId " +

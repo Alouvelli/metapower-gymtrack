@@ -30,7 +30,7 @@ public interface TicketEntreeRepository extends JpaRepository<TicketEntree, Long
 
     // ── Requêtes filtrées par gérant (vendeur) ─────────────────────────────────
 
-    List<TicketEntree> findByVendeurId(Long userId);
+    List<TicketEntree> findByVendeurIdOrderByDatePaiementDescIdDesc(Long userId);
 
     @Query("SELECT COALESCE(SUM(t.prix), 0) FROM TicketEntree t " +
            "WHERE t.vendeur.id = :userId " +

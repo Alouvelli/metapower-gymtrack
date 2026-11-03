@@ -1,5 +1,6 @@
 package sn.metapower.gymtrack.controllers;
 
+import org.springframework.data.domain.Sort;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +41,9 @@ public class MensualiteController {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_GERANT"));
         if (isGerant) {
             AppUser user = userRepository.findByUsername(authentication.getName());
-            return mensualiteRepository.findByEnregistreParId(user.getId());
+            return mensualiteRepository.findByEnregistreParIdOrderByDatePaiementDescIdDesc(user.getId());
         }
-        return mensualiteRepository.findAll();
+        return mensualiteRepository.findAll(Sort.by(Sort.Direction.DESC, "datePaiement", "id"));
     }
 
     @GetMapping("/membre/{membreId}")

@@ -1,5 +1,6 @@
 package sn.metapower.gymtrack.controllers;
 
+import org.springframework.data.domain.Sort;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class MembreController {
 
     @GetMapping
     public List<MembreResponse> findAll() {
-        return membreRepository.findAll().stream().map(MembreResponse::from).toList();
+        return membreRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt", "id")).stream().map(MembreResponse::from).toList();
     }
 
     @GetMapping("/{id}")
