@@ -30,6 +30,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import unicodedata
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from html import escape
@@ -246,7 +247,7 @@ def main():
         dossier = SORTIE / 'jpeg'
         dossier.mkdir(exist_ok=True)
         for m, c in zip(choisis, cartes):
-            nom = re.sub(r'[^A-Za-z0-9]+', '_', f'{m["nom"]}_{m["prenom"]}'.encode('ascii', 'ignore').decode()).strip('_')
+            nom = re.sub(r'[^A-Za-z0-9]+', '_', unicodedata.normalize('NFKD', f'{m["nom"]}_{m["prenom"]}').encode('ascii', 'ignore').decode()).strip('_')
             jpeg(c, base, dossier / f'{m["numero"]}_{nom}.jpg')
         print(f'→ {dossier}/ ({len(choisis)} JPEG)', file=sys.stderr)
 
